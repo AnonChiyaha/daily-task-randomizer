@@ -309,6 +309,7 @@ function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)
 let DATA = loadData();
 let calYear, calMonth, selectedDay = null;
 let subdividableOn = false;
+let editingTaskId = null;
 
 // ============================================================
 // HELPERS
@@ -500,6 +501,41 @@ function deleteTask(id) {
   renderAll();
 }
 
+function startEdit(id) { editingTaskId = id; renderAll(); }
+function cancelEdit() { editingTaskId = null; renderAll(); }
+
+function saveEdit(id) {
+  const task = DATA.tasks.find(t => t.id === id);
+  if (!task) return;
+  task.name = document.getElementById('edit-name').value.trim() || task.name;
+  task.deadline = document.getElementById('edit-deadline').value || task.deadline;
+  if (task.subdividable) {
+    task.totalUnits = Math.max(1, parseInt(document.getElementById('edit-units').value) || task.totalUnits);
+    task.unitLabel = document.getElementById('edit-label').value.trim() || task.unitLabel;
+  }
+  editingTaskId = null;
+  saveData(DATA);
+  renderAll();
+}
+
+function renderEditForm(t) {
+  return `<div style="padding:4px 0;">
+    <div class="form-row" style="margin-bottom:6px;">
+      <div class="form-group"><label>名称</label><input type="text" id="edit-name" value="${escHtml(t.name)}" maxlength="80"></div>
+      <div class="form-group"><label>截止</label><input type="date" id="edit-deadline" value="${t.deadline}"></div>
+    </div>
+    ${t.subdividable ? `
+    <div class="form-row" style="margin-bottom:8px;">
+      <div class="form-group"><label>总量</label><input type="number" id="edit-units" value="${t.totalUnits||0}" min="1" max="999"></div>
+      <div class="form-group"><label>单位</label><input type="text" id="edit-label" value="${escHtml(t.unitLabel||'')}" maxlength="10"></div>
+    </div>` : ''}
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-primary btn-sm" onclick="saveEdit('${t.id}')">保存</button>
+      <button class="btn btn-ghost btn-sm" onclick="cancelEdit()">取消</button>
+    </div>
+  </div>`;
+}
+
 // ============================================================
 // TODAY
 // ============================================================
@@ -669,14 +705,16 @@ function renderTaskPool() {
     }
 
     return `<li class="task-item ${fullyDone ? 'done' : ''}">
+      ${editingTaskId === t.id ? renderEditForm(t) : `
       <div class="task-item-row">
         <div class="task-info">
           <div class="task-name">${escHtml(t.name)}${t.subdividable ? ' <span style="font-size:0.7rem;color:var(--primary);font-weight:600">[细分]</span>' : ''}</div>
           <div class="task-meta">${deadlineHtml}</div>
           ${progressHtml}
         </div>
+        <button class="task-delete" onclick="startEdit('${t.id}')" title="编辑" style="margin-right:2px;">✏️</button>
         <button class="task-delete" onclick="deleteTask('${t.id}')" title="删除">🗑</button>
-      </div>
+      </div>`}
     </li>`;
   }).join('');
 }
@@ -923,6 +961,7 @@ function saveSettings() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.activeElement === document.getElementById('taskNameInput')) { e.preventDefault(); addTask(); }
   if (e.key === 'Enter' && document.activeElement === document.getElementById('taskDeadlineInput')) { e.preventDefault(); addTask(); }
+  if (e.key === 'Escape' && editingTaskId) { e.preventDefault(); cancelEdit(); }
 });
 
 // ============================================================

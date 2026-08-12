@@ -360,10 +360,10 @@ function isDoneToday(taskId) {
 // Formula:
 //   avgPerDay = remainingUnits / daysRemaining        (steady baseline)
 //   progress  = elapsedDays / totalInitialDays        (0 at start, 1 at end)
-//   ramp      = 0.8 + 0.4 * progress                  (range: 0.8 → 1.2)
+//   ramp      = 0.7 + 0.6 * progress                  (range: 0.7 → 1.3)
 //   daily     = round(avgPerDay * ramp), clamped [1, remaining]
 //
-// This gives a gentle ~50% increase from early to late, vs 600% in old linear ramp.
+// This gives a gentle ~85% increase from early to late (70%→130% of average).
 function calcDailyUnits(task) {
   if (!task.subdividable) return null;
   const remaining = (task.totalUnits || 0) - (task.completedUnits || 0);
@@ -380,7 +380,7 @@ function calcDailyUnits(task) {
 
   const avgPerDay = remaining / daysRemaining;
   const progress = totalDays <= 1 ? 1 : elapsedDays / Math.max(totalDays - 1, 1);
-  const ramp = 0.8 + 0.4 * progress; // 0.8 early → 1.2 late
+  const ramp = 0.7 + 0.6 * progress; // 0.7 early → 1.3 late
 
   const daily = Math.round(avgPerDay * ramp);
   return Math.max(1, Math.min(remaining, daily));

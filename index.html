@@ -813,9 +813,24 @@ function renderDayDetail() {
     if (typeof d === 'string') doneSet.add(d);
     else { doneSet.add(d.id); doneUnitMap[d.id] = d.units; }
   });
+
+  // Check full completion per-unit (same logic as getDayStatus)
+  let fullyDone = true, anyDone = false;
+  for (const entry of dd.assigned) {
+    const id = typeof entry === 'string' ? entry : entry.id;
+    const de = (dd.done || []).find(d => (typeof d === 'string' ? d : d.id) === id);
+    if (!de) { fullyDone = false; }
+    else {
+      anyDone = true;
+      if (typeof entry === 'object' && entry.units && typeof de === 'object' && de.units < entry.units) {
+        fullyDone = false;
+      }
+    }
+  }
+
   const dc = (dd.done || []).length, tc = dd.assigned.length;
-  const emoji = dc===tc?'🎉':dc>0?'🏃':'😴';
-  const dateStr = selectedDay; // capture for closure
+  const emoji = fullyDone ? '🎉' : anyDone ? '🏃' : '😴';
+  const dateStr = selectedDay;
 
   const tasksHtml = dd.assigned.map(entry => {
     const id = typeof entry === 'string' ? entry : entry.id;

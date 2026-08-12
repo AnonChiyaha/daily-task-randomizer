@@ -878,8 +878,8 @@ function renderDayDetail() {
     const isDone = doneSet.has(id);
     let extra = '';
     if (typeof entry === 'object' && entry.units) {
-      const du = isDone ? (doneUnitMap[id] || entry.units) : entry.units;
-      extra = ` (${du}${escHtml(entry.label||'')})`;
+      const du = isDone ? (doneUnitMap[id] || entry.units) : 0;
+      extra = ` (${du}/${entry.units}${escHtml(entry.label||'')})`;
     }
     // Toggle button for all days, edit input for subdivided tasks on past days
     let actionBtn = '';
@@ -903,7 +903,7 @@ function renderDayDetail() {
     </div>`;
   }).join('');
 
-  detail.innerHTML = `<h3>${emoji} ${fmtDate(selectedDay)} — ${dc}/${tc} ${statusText}</h3>${tasksHtml}`;
+  detail.innerHTML = `<h3>${emoji} ${fmtDate(selectedDay)} — ${statusText}</h3>${tasksHtml}`;
   detail.classList.add('active');
 }
 

@@ -225,7 +225,7 @@
     <div class="panel-body">
       <div class="form-group">
         <label>任务名称</label>
-        <input type="text" id="taskNameInput" placeholder="此处输入需要完成的任务" maxlength="80">
+        <input type="text" id="taskNameInput" placeholder="例如：复习机械设计第三章" maxlength="80">
       </div>
       <div class="form-group">
         <label>截止日期</label>
@@ -777,7 +777,8 @@ function renderToday() {
         taskNameHtml += ` <span style="font-size:0.78rem;color:var(--success);font-weight:600">✓ 已完成 ${doneUnits} ${escHtml(entry.label)}</span>`;
       } else {
         partialHtml = `<div style="display:flex;align-items:center;gap:6px;margin-top:2px;font-size:0.8rem;color:var(--text-secondary);">
-          实际完成：<input type="number" id="pu-${id}" value="${entry.units}" min="1" max="${task.totalUnits - (task.completedUnits || 0)}" style="width:48px;text-align:center;padding:3px 4px;font-size:0.8rem;border:1.5px solid var(--border);border-radius:4px;"> ${escHtml(entry.label)}
+          实际完成：<input type="number" id="pu-${id}" value="${entry.units}" min="1" max="${task.totalUnits - (task.completedUnits || 0)}" oninput="var el=document.getElementById('over-${id}');el.style.display=(parseInt(this.value)>${entry.units})?'inline':'none'" style="width:48px;text-align:center;padding:3px 4px;font-size:0.8rem;border:1.5px solid var(--border);border-radius:4px;"> ${escHtml(entry.label)}
+          <span id="over-${id}" style="display:none;color:var(--warning);font-size:0.72rem;font-weight:700;margin-left:4px;">🔥 超额</span>
         </div>`;
       }
       dlText = `总量${task.totalUnits}${escHtml(task.unitLabel)}，剩余${remaining}${escHtml(task.unitLabel)} · ${dlText}`;

@@ -868,6 +868,7 @@ function renderDayDetail() {
 
   const dc = (dd.done || []).length, tc = dd.assigned.length;
   const emoji = fullyDone ? '🎉' : anyDone ? '🏃' : '😴';
+  const statusText = fullyDone ? '全部完成' : anyDone ? '部分完成' : '未完成';
   const dateStr = selectedDay;
 
   const tasksHtml = dd.assigned.map(entry => {
@@ -902,7 +903,7 @@ function renderDayDetail() {
     </div>`;
   }).join('');
 
-  detail.innerHTML = `<h3>${emoji} ${fmtDate(selectedDay)} — ${dc}/${tc} 完成</h3>${tasksHtml}`;
+  detail.innerHTML = `<h3>${emoji} ${fmtDate(selectedDay)} — ${dc}/${tc} ${statusText}</h3>${tasksHtml}`;
   detail.classList.add('active');
 }
 

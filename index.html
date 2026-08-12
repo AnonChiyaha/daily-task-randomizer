@@ -186,6 +186,7 @@
   .day-detail .history-task .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .dot-done { background: var(--success); }
   .dot-undone { background: var(--danger); }
+  .dot-partial { background: var(--warning); }
 
   .empty { text-align: center; padding: 32px 16px; color: var(--text-muted); }
   .empty .emoji { font-size: 2.5rem; margin-bottom: 8px; }
@@ -896,8 +897,17 @@ function renderDayDetail() {
         actionBtn = `<button class="btn btn-xs ${isDone?'btn-ghost':'btn-primary'}" onclick="toggleDayTask('${dateStr}','${id}')" style="margin-left:auto;flex-shrink:0;">${isDone?'撤销':'✓完成'}</button>`;
       }
     }
+    // Determine dot color: green (done), yellow (partial), red (undone)
+    let dotClass = 'dot-undone';
+    if (isDone) {
+      if (typeof entry === 'object' && entry.units && doneUnitMap[id] !== undefined && doneUnitMap[id] < entry.units) {
+        dotClass = 'dot-partial';
+      } else {
+        dotClass = 'dot-done';
+      }
+    }
     return `<div class="history-task">
-      <span class="dot ${isDone?'dot-done':'dot-undone'}"></span>
+      <span class="dot ${dotClass}"></span>
       <span style="${isDone?'text-decoration:line-through;color:var(--text-muted)':''}">${escHtml(name)}${extra}</span>
       ${actionBtn}
     </div>`;

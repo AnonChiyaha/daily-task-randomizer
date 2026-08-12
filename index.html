@@ -352,21 +352,38 @@ function isDoneToday(taskId) {
 }
 
 // ============================================================
-// SUBDIVISION: calculate daily units
+// SUBDIVISION: calculate daily units (gentle adaptive ramp)
 // ============================================================
+// Core idea: stay close to average pace (剩余/天数) with a mild ±20%
+// adjustment as deadline approaches. Much more humane than linear ramp.
+//
+// Formula:
+//   avgPerDay = remainingUnits / daysRemaining        (steady baseline)
+//   progress  = elapsedDays / totalInitialDays        (0 at start, 1 at end)
+//   ramp      = 0.8 + 0.4 * progress                  (range: 0.8 → 1.2)
+//   daily     = round(avgPerDay * ramp), clamped [1, remaining]
+//
+// This gives a gentle ~50% increase from early to late, vs 600% in old linear ramp.
 function calcDailyUnits(task) {
   if (!task.subdividable) return null;
   const remaining = (task.totalUnits || 0) - (task.completedUnits || 0);
   if (remaining <= 0) return 0;
+
   const ddl = new Date(task.deadline);
   const today = new Date(todayStr());
   const daysRemaining = Math.max(1, Math.ceil((ddl - today) / 86400000) + 1);
   if (daysRemaining === 1) return remaining;
-  // Linear ramp: today=weight 1, last day=weight N
-  // Sum of weights = n(n+1)/2, k = 2*remaining / (n(n+1))
-  const n = daysRemaining;
-  const k = (2 * remaining) / (n * (n + 1));
-  return Math.max(1, Math.min(remaining, Math.round(k)));
+
+  // Total days from creation to deadline (fixed reference for ramp)
+  const totalDays = Math.max(1, daysBetween(task.createdAt, task.deadline) + 1);
+  const elapsedDays = Math.max(0, totalDays - daysRemaining);
+
+  const avgPerDay = remaining / daysRemaining;
+  const progress = totalDays <= 1 ? 1 : elapsedDays / Math.max(totalDays - 1, 1);
+  const ramp = 0.8 + 0.4 * progress; // 0.8 early → 1.2 late
+
+  const daily = Math.round(avgPerDay * ramp);
+  return Math.max(1, Math.min(remaining, daily));
 }
 
 // ============================================================

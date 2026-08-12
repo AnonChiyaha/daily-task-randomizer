@@ -346,9 +346,27 @@ function getAvailableTasks() {
 }
 
 // Is a task done for TODAY (checked off)
+// done array stores strings for normal tasks, {id, units} for subdivided
 function isDoneToday(taskId) {
   const td = DATA.daily[todayStr()];
-  return td && (td.done || []).includes(taskId);
+  if (!td || !td.done) return false;
+  return td.done.some(d => (typeof d === 'string' ? d : d.id) === taskId);
+}
+
+// Get how many units were completed today for a subdivided task
+function getDoneUnitsToday(taskId) {
+  const td = DATA.daily[todayStr()];
+  if (!td || !td.done) return 0;
+  const e = td.done.find(d => (typeof d === 'string' ? d : d.id) === taskId);
+  return (e && typeof e === 'object') ? e.units : 0;
+}
+
+// Get assigned units for a task today
+function getAssignedUnits(taskId) {
+  const td = DATA.daily[todayStr()];
+  if (!td || !td.assigned) return 0;
+  const e = td.assigned.find(a => (typeof a === 'string' ? a : a.id) === taskId);
+  return (e && typeof e === 'object') ? e.units : 0;
 }
 
 // ============================================================
@@ -476,7 +494,7 @@ function deleteTask(id) {
   for (const date in DATA.daily) {
     const d = DATA.daily[date];
     d.assigned = (d.assigned || []).filter(a => (typeof a === 'string' ? a : a.id) !== id);
-    d.done = (d.done || []).filter(a => a !== id);
+    d.done = (d.done || []).filter(a => (typeof a === 'string' ? a : a.id) !== id);
   }
   saveData(DATA);
   renderAll();
@@ -516,28 +534,31 @@ function generateToday() {
   renderAll();
 }
 
-function toggleTaskDone(taskId) {
+function toggleTaskDone(taskId, units) {
   const td = todayStr();
   if (!DATA.daily[td]) return;
   const done = DATA.daily[td].done || [];
-  const idx = done.indexOf(taskId);
   const task = DATA.tasks.find(t => t.id === taskId);
+  const existingIdx = done.findIndex(d => (typeof d === 'string' ? d : d.id) === taskId);
 
-  if (idx >= 0) {
-    // Un-check: undo
-    done.splice(idx, 1);
-    if (task && task.subdividable) {
-      const entry = DATA.daily[td].assigned.find(a => (typeof a === 'string' ? a : a.id) === taskId);
-      const units = (entry && typeof entry === 'object') ? entry.units : 0;
-      task.completedUnits = Math.max(0, (task.completedUnits || 0) - units);
+  if (existingIdx >= 0) {
+    // Un-check: undo completion
+    const existing = done[existingIdx];
+    if (task && task.subdividable && typeof existing === 'object') {
+      task.completedUnits = Math.max(0, (task.completedUnits || 0) - existing.units);
     }
+    done.splice(existingIdx, 1);
   } else {
-    // Check: complete
-    done.push(taskId);
+    // Check: mark complete
     if (task && task.subdividable) {
-      const entry = DATA.daily[td].assigned.find(a => (typeof a === 'string' ? a : a.id) === taskId);
-      const units = (entry && typeof entry === 'object') ? entry.units : 0;
-      task.completedUnits = Math.min(task.totalUnits, (task.completedUnits || 0) + units);
+      const maxPossible = task.totalUnits - (task.completedUnits || 0);
+      const actualUnits = Math.max(1, Math.min(maxPossible,
+        (units !== undefined && units !== null) ? parseInt(units) : getAssignedUnits(taskId)
+      ));
+      done.push({ id: taskId, units: actualUnits });
+      task.completedUnits = (task.completedUnits || 0) + actualUnits;
+    } else {
+      done.push(taskId);
     }
   }
   DATA.daily[td].done = done;
@@ -560,9 +581,9 @@ function selectDay(ds) { selectedDay = ds; renderAll(); }
 function getDayStatus(dateStr) {
   const day = DATA.daily[dateStr];
   if (!day || !day.assigned || day.assigned.length === 0) return null;
-  const done = day.done || [];
-  if (done.length === 0) return 'none';
-  if (done.length >= day.assigned.length) return 'all';
+  const doneCount = (day.done || []).length;
+  if (doneCount === 0) return 'none';
+  if (doneCount >= day.assigned.length) return 'all';
   return 'partial';
 }
 
@@ -667,9 +688,10 @@ function renderToday() {
   genBtn.textContent = '🔄 重新分配';
   genBtn.disabled = false;
 
-  const doneSet = new Set(dayData.done || []);
+  const doneSet = new Set(); // We need to track done by id, even for {id, units} objects
+  (dayData.done || []).forEach(d => doneSet.add(typeof d === 'string' ? d : d.id));
   const total = dayData.assigned.length;
-  const doneCount = doneSet.size;
+  const doneCount = (dayData.done || []).length;
 
   stats.textContent = `${doneCount}/${total} 完成`;
   document.getElementById('statAssigned').textContent = total;
@@ -691,13 +713,21 @@ function renderToday() {
     let taskNameHtml = escHtml(task.name);
     if (task.subdividable && typeof entry === 'object' && entry.units) {
       const remaining = (task.totalUnits || 0) - (task.completedUnits || 0);
-      taskNameHtml += ` — <strong>今日 ${entry.units} ${escHtml(entry.label)}</strong>`;
+      const doneUnits = isDone ? getDoneUnitsToday(id) : 0;
+      const displayUnits = isDone ? doneUnits : entry.units;
+      const maxEdit = isDone ? doneUnits : Math.min(task.totalUnits - (task.completedUnits || 0), entry.units * 2);
+      taskNameHtml += ` — 完成 ` +
+        `<input type="number" class="partial-units" id="pu-${id}" 
+          value="${displayUnits}" min="1" max="${maxEdit}"
+          ${isDone ? 'disabled' : ''}
+          style="width:48px;text-align:center;padding:2px 4px;font-size:0.8rem;border:1.5px solid var(--border);border-radius:4px;background:${isDone?'var(--bg)':'white'};">` +
+        ` ${escHtml(entry.label)}`;
       dlText = `总量${task.totalUnits}${escHtml(task.unitLabel)}，剩余${remaining}${escHtml(task.unitLabel)} · ${dlText}`;
     }
 
     return `<li class="task-item ${isDone ? 'done' : ''}">
       <div class="task-item-row">
-        <div class="task-checkbox ${isDone ? 'checked' : ''}" onclick="toggleTaskDone('${id}')"></div>
+        <div class="task-checkbox ${isDone ? 'checked' : ''}" onclick="toggleTaskDone('${id}'${task.subdividable && typeof entry==='object' ? `,document.getElementById('pu-${id}').value` : ''})"></div>
         <div class="task-info">
           <div class="task-name">${taskNameHtml}</div>
           <div class="task-meta"><span class="${dlClass}">${dlText}</span></div>
@@ -752,11 +782,21 @@ function renderDayDetail() {
   const detail = document.getElementById('dayDetail');
   if (!selectedDay) { detail.classList.remove('active'); return; }
   const dd = DATA.daily[selectedDay];
+  const isToday = selectedDay === todayStr();
   if (!dd || !dd.assigned || dd.assigned.length === 0) {
     detail.innerHTML = `<p style="font-size:0.8rem;color:var(--text-muted)">📭 ${fmtDate(selectedDay)} — 该日无任务记录</p>`;
     detail.classList.add('active'); return;
   }
-  const doneSet = new Set(dd.done || []);
+  const doneSet = new Set();
+  const doneUnitMap = {};
+  (dd.done || []).forEach(d => {
+    if (typeof d === 'string') doneSet.add(d);
+    else { doneSet.add(d.id); doneUnitMap[d.id] = d.units; }
+  });
+  const dc = (dd.done || []).length, tc = dd.assigned.length;
+  const emoji = dc===tc?'🎉':dc>0?'🏃':'😴';
+  const dateStr = selectedDay; // capture for closure
+
   const tasksHtml = dd.assigned.map(entry => {
     const id = typeof entry === 'string' ? entry : entry.id;
     const task = DATA.tasks.find(t => t.id === id);
@@ -764,18 +804,73 @@ function renderDayDetail() {
     const isDone = doneSet.has(id);
     let extra = '';
     if (typeof entry === 'object' && entry.units) {
-      extra = ` <span style="font-size:0.7rem;color:var(--text-muted)">(${entry.units}${escHtml(entry.label||'')})</span>`;
+      const du = isDone ? (doneUnitMap[id] || entry.units) : entry.units;
+      extra = ` (${du}${escHtml(entry.label||'')})`;
+    }
+    // Toggle button for all days, edit input for subdivided tasks on past days
+    let actionBtn = '';
+    if (!isToday) {
+      if (task && task.subdividable && typeof entry === 'object') {
+        actionBtn = `<span style="display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0;">
+          <input type="number" class="hist-units" id="hu-${id}" value="${isDone ? (doneUnitMap[id]||entry.units) : entry.units}" 
+            min="1" max="${task.totalUnits}" style="width:44px;text-align:center;padding:2px 4px;font-size:0.7rem;border:1px solid var(--border);border-radius:3px;"
+            onchange="editHistoryUnits('${dateStr}','${id}',this.value,${entry.units},'${escHtml(entry.label||'')}')">
+          <span style="font-size:0.68rem;color:var(--text-muted)">${escHtml(entry.label||'')}</span>
+          <button class="btn btn-xs ${isDone?'btn-ghost':'btn-primary'}" onclick="toggleDayTask('${dateStr}','${id}',document.getElementById('hu-${id}').value)" style="margin-left:4px;">${isDone?'撤销':'✓完成'}</button>
+        </span>`;
+      } else {
+        actionBtn = `<button class="btn btn-xs ${isDone?'btn-ghost':'btn-primary'}" onclick="toggleDayTask('${dateStr}','${id}')" style="margin-left:auto;flex-shrink:0;">${isDone?'撤销':'✓完成'}</button>`;
+      }
     }
     return `<div class="history-task">
       <span class="dot ${isDone?'dot-done':'dot-undone'}"></span>
       <span style="${isDone?'text-decoration:line-through;color:var(--text-muted)':''}">${escHtml(name)}${extra}</span>
-      ${isDone?'<span style="color:var(--success);font-size:0.7rem;margin-left:auto">✓</span>':''}
+      ${actionBtn}
     </div>`;
   }).join('');
-  const dc = doneSet.size, tc = dd.assigned.length;
-  const emoji = dc===tc?'🎉':dc>0?'🏃':'😴';
+
   detail.innerHTML = `<h3>${emoji} ${fmtDate(selectedDay)} — ${dc}/${tc} 完成</h3>${tasksHtml}`;
   detail.classList.add('active');
+}
+
+// Toggle task completion for a specific date (calendar editing)
+function toggleDayTask(dateStr, taskId, units) {
+  const day = DATA.daily[dateStr];
+  if (!day) { DATA.daily[dateStr] = { assigned: [], done: [] }; return; }
+  const done = day.done || [];
+  const task = DATA.tasks.find(t => t.id === taskId);
+  const existingIdx = done.findIndex(d => (typeof d === 'string' ? d : d.id) === taskId);
+
+  if (existingIdx >= 0) {
+    const existing = done[existingIdx];
+    if (task && task.subdividable && typeof existing === 'object') {
+      task.completedUnits = Math.max(0, (task.completedUnits || 0) - existing.units);
+    }
+    done.splice(existingIdx, 1);
+  } else {
+    if (task && task.subdividable) {
+      const u = Math.max(1, parseInt(units) || getAssignedUnitsForDate(dateStr, taskId));
+      done.push({ id: taskId, units: Math.min(task.totalUnits - (task.completedUnits || 0), u) });
+      task.completedUnits = (task.completedUnits || 0) + u;
+    } else {
+      done.push(taskId);
+    }
+  }
+  day.done = done;
+  saveData(DATA);
+  selectDay(dateStr); // refresh day detail
+}
+
+function getAssignedUnitsForDate(dateStr, taskId) {
+  const day = DATA.daily[dateStr];
+  if (!day || !day.assigned) return 0;
+  const e = day.assigned.find(a => (typeof a === 'string' ? a : a.id) === taskId);
+  return (e && typeof e === 'object') ? e.units : 0;
+}
+
+function editHistoryUnits(dateStr, taskId, newVal, defaultVal, label) {
+  // Just updates the input's display value; actual application happens on toggle click
+  // No-op for now — value is read on toggle
 }
 
 function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }

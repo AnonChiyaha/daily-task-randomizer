@@ -581,9 +581,27 @@ function selectDay(ds) { selectedDay = ds; renderAll(); }
 function getDayStatus(dateStr) {
   const day = DATA.daily[dateStr];
   if (!day || !day.assigned || day.assigned.length === 0) return null;
-  const doneCount = (day.done || []).length;
-  if (doneCount === 0) return 'none';
-  if (doneCount >= day.assigned.length) return 'all';
+
+  let allFullyDone = true;
+  let anyDone = false;
+  const doneArr = day.done || [];
+
+  for (const entry of day.assigned) {
+    const id = typeof entry === 'string' ? entry : entry.id;
+    const doneEntry = doneArr.find(d => (typeof d === 'string' ? d : d.id) === id);
+    if (!doneEntry) {
+      allFullyDone = false;
+    } else {
+      anyDone = true;
+      // Subdivided task: check if actual units < assigned units
+      if (typeof entry === 'object' && entry.units && typeof doneEntry === 'object' && doneEntry.units < entry.units) {
+        allFullyDone = false;
+      }
+    }
+  }
+
+  if (!anyDone) return 'none';
+  if (allFullyDone) return 'all';
   return 'partial';
 }
 

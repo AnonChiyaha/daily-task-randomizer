@@ -711,26 +711,28 @@ function renderToday() {
     else { dlText = `剩余 ${daysLeft} 天`; }
 
     let taskNameHtml = escHtml(task.name);
+    let partialHtml = '';
     if (task.subdividable && typeof entry === 'object' && entry.units) {
       const remaining = (task.totalUnits || 0) - (task.completedUnits || 0);
       const doneUnits = isDone ? getDoneUnitsToday(id) : 0;
-      const displayUnits = isDone ? doneUnits : entry.units;
-      const maxEdit = isDone ? doneUnits : Math.min(task.totalUnits - (task.completedUnits || 0), entry.units * 2);
-      taskNameHtml += ` — 完成 ` +
-        `<input type="number" class="partial-units" id="pu-${id}" 
-          value="${displayUnits}" min="1" max="${maxEdit}"
-          ${isDone ? 'disabled' : ''}
-          style="width:48px;text-align:center;padding:2px 4px;font-size:0.8rem;border:1.5px solid var(--border);border-radius:4px;background:${isDone?'var(--bg)':'white'};">` +
-        ` ${escHtml(entry.label)}`;
+      taskNameHtml += ` — <strong style="font-weight:600;color:var(--primary)">今日 ${entry.units} ${escHtml(entry.label)}</strong>`;
+      if (isDone) {
+        taskNameHtml += ` <span style="font-size:0.78rem;color:var(--success);font-weight:600">✓ 已完成 ${doneUnits} ${escHtml(entry.label)}</span>`;
+      } else {
+        partialHtml = `<div style="display:flex;align-items:center;gap:6px;margin-top:2px;font-size:0.8rem;color:var(--text-secondary);">
+          实际完成：<input type="number" id="pu-${id}" value="${entry.units}" min="1" max="${Math.min(task.totalUnits - (task.completedUnits || 0), Math.max(entry.units, 1))}" style="width:48px;text-align:center;padding:3px 4px;font-size:0.8rem;border:1.5px solid var(--border);border-radius:4px;"> ${escHtml(entry.label)}
+        </div>`;
+      }
       dlText = `总量${task.totalUnits}${escHtml(task.unitLabel)}，剩余${remaining}${escHtml(task.unitLabel)} · ${dlText}`;
     }
 
     return `<li class="task-item ${isDone ? 'done' : ''}">
       <div class="task-item-row">
-        <div class="task-checkbox ${isDone ? 'checked' : ''}" onclick="toggleTaskDone('${id}'${task.subdividable && typeof entry==='object' ? `,document.getElementById('pu-${id}').value` : ''})"></div>
+        <div class="task-checkbox ${isDone ? 'checked' : ''}" onclick="toggleTaskDone('${id}'${task.subdividable && !isDone && typeof entry==='object' ? `,document.getElementById('pu-${id}').value` : ''})"></div>
         <div class="task-info">
           <div class="task-name">${taskNameHtml}</div>
           <div class="task-meta"><span class="${dlClass}">${dlText}</span></div>
+          ${partialHtml}
         </div>
       </div>
     </li>`;

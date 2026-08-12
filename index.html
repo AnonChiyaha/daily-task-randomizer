@@ -24,11 +24,9 @@
     --radius: 12px;
     --radius-sm: 8px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
     --font: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  
   body {
     font-family: var(--font);
     background: var(--bg);
@@ -38,7 +36,6 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ========== HEADER ========== */
   .header {
     background: var(--card);
     border-bottom: 1px solid var(--border);
@@ -48,364 +45,168 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: sticky; top: 0; z-index: 100;
   }
-  .header-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .header-title { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
   .header-title .icon { font-size: 1.5rem; }
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .today-label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-  .badge {
-    background: var(--primary-light);
-    color: var(--primary);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-  }
+  .today-label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
+  .badge { background: var(--primary-light); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
 
-  /* ========== MAIN LAYOUT ========== */
   .main {
     display: grid;
-    grid-template-columns: 340px 1fr 320px;
+    grid-template-columns: 360px 1fr 320px;
     gap: 20px;
     padding: 20px 24px;
-    max-width: 1400px;
+    max-width: 1440px;
     margin: 0 auto;
     min-height: calc(100vh - 70px);
   }
+  @media (max-width: 1150px) { .main { grid-template-columns: 1fr 320px; } .panel-tasks { grid-column: 1 / -1; } }
+  @media (max-width: 768px) { .main { grid-template-columns: 1fr; padding: 12px; gap: 12px; } .header { padding: 12px 16px; } }
 
-  @media (max-width: 1100px) {
-    .main { grid-template-columns: 1fr 320px; }
-    .panel-tasks { grid-column: 1 / -1; }
-  }
-  @media (max-width: 768px) {
-    .main { grid-template-columns: 1fr; padding: 12px; gap: 12px; }
-    .header { padding: 12px 16px; }
-  }
+  .panel { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+  .panel-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .panel-header h2 { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .panel-body { padding: 14px 18px; }
 
-  /* ========== PANELS ========== */
-  .panel {
-    background: var(--card);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-  .panel-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .panel-header h2 {
-    font-size: 0.95rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .panel-body { padding: 16px 20px; }
-  .panel-body.no-padding { padding: 0; }
-
-  /* ========== BUTTONS ========== */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.15s ease;
-    font-family: var(--font);
-    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: var(--radius-sm);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    border: none; transition: all 0.15s ease; font-family: var(--font); white-space: nowrap;
   }
-  .btn-primary {
-    background: var(--primary);
-    color: white;
-  }
-  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
   .btn-ghost:hover { background: var(--bg); color: var(--text); }
   .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
+  .btn-xs { padding: 3px 8px; font-size: 0.7rem; border-radius: 4px; }
   .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
   .btn-danger:hover { background: var(--danger-light); }
-  .btn-success { background: var(--success); color: white; }
-  .btn-success:hover { background: #059669; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+  .btn-link { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.78rem; padding: 0; font-family: var(--font); text-decoration: underline; }
+  .btn-link:hover { color: var(--primary-hover); }
 
-  /* ========== FORMS ========== */
-  .form-group { margin-bottom: 10px; }
-  .form-group label {
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
-  }
+  .form-group { margin-bottom: 8px; }
+  .form-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
   .form-row { display: flex; gap: 8px; }
   .form-row .form-group { flex: 1; margin-bottom: 0; }
   input[type="text"], input[type="date"], input[type="number"] {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 0.875rem;
-    font-family: var(--font);
-    transition: border 0.15s;
-    background: var(--bg);
-    color: var(--text);
+    width: 100%; padding: 8px 12px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 0.875rem; font-family: var(--font);
+    transition: border 0.15s; background: var(--bg); color: var(--text);
   }
-  input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-light);
-  }
-  input[type="date"] { cursor: pointer; }
+  input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
 
-  /* ========== TASK LIST ========== */
-  .task-list { list-style: none; }
-  .task-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    transition: background 0.15s;
-    margin-bottom: 4px;
+  /* Subdivision toggle */
+  .toggle-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; cursor: pointer; font-size: 0.8rem; color: var(--text-secondary); user-select: none; }
+  .toggle-switch { width: 34px; height: 20px; background: var(--border); border-radius: 10px; position: relative; transition: background 0.2s; flex-shrink: 0; }
+  .toggle-switch.on { background: var(--primary); }
+  .toggle-switch::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 16px; height: 16px; border-radius: 50%; background: white;
+    transition: transform 0.2s;
   }
+  .toggle-switch.on::after { transform: translateX(14px); }
+  .sub-fields { display: none; padding: 8px; background: var(--bg); border-radius: var(--radius-sm); margin-bottom: 8px; }
+  .sub-fields.show { display: block; }
+  .sub-fields .inline-row { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; margin-bottom: 4px; }
+  .sub-fields .inline-row input { width: 72px; text-align: center; }
+  .sub-fields .unit-input { width: 80px !important; }
+  .hint-text { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+  /* Task list */
+  .task-list { list-style: none; }
+  .task-item { padding: 10px 12px; border-radius: var(--radius-sm); transition: background 0.15s; margin-bottom: 4px; }
   .task-item:hover { background: var(--bg); }
   .task-item.done .task-name { text-decoration: line-through; color: var(--text-muted); }
-  .task-checkbox {
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--border);
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.15s;
-    background: white;
-  }
-  .task-checkbox.checked {
-    background: var(--success);
-    border-color: var(--success);
-  }
-  .task-checkbox.checked::after {
-    content: '✓';
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 700;
-  }
-  .task-checkbox:hover { border-color: var(--primary); }
+  .task-item-row { display: flex; align-items: center; gap: 10px; }
   .task-info { flex: 1; min-width: 0; }
   .task-name { font-size: 0.875rem; font-weight: 500; }
-  .task-deadline {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-top: 1px;
-  }
-  .task-deadline.urgent { color: var(--danger); font-weight: 600; }
-  .task-deadline.soon { color: var(--warning); font-weight: 500; }
+  .task-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .task-meta .urgent { color: var(--danger); font-weight: 600; }
+  .task-meta .soon { color: var(--warning); font-weight: 500; }
   .task-delete {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-muted);
-    font-size: 1rem;
-    padding: 4px;
-    border-radius: 4px;
-    transition: all 0.15s;
-    flex-shrink: 0;
+    background: none; border: none; cursor: pointer; color: var(--text-muted);
+    font-size: 1rem; padding: 4px; border-radius: 4px; transition: all 0.15s; flex-shrink: 0;
   }
   .task-delete:hover { color: var(--danger); background: var(--danger-light); }
 
-  /* ========== CALENDAR ========== */
-  .calendar-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 0;
+  /* Progress bar */
+  .progress-wrap { margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+  .progress-bar {
+    flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden;
   }
-  .calendar-nav .month-label {
-    font-weight: 700;
-    font-size: 0.9rem;
+  .progress-bar .fill {
+    height: 100%; border-radius: 3px; transition: width 0.3s;
+    background: linear-gradient(90deg, var(--primary), #a78bfa);
   }
+  .progress-text { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+
+  /* Today checkbox */
+  .task-checkbox {
+    width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 6px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s; background: white;
+  }
+  .task-checkbox.checked { background: var(--success); border-color: var(--success); }
+  .task-checkbox.checked::after { content: '✓'; color: white; font-size: 0.7rem; font-weight: 700; }
+  .task-checkbox:hover { border-color: var(--primary); }
+
+  /* Calendar */
+  .calendar-nav { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+  .calendar-nav .month-label { font-weight: 700; font-size: 0.9rem; }
   .calendar-nav .nav-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 4px 10px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.15s;
-    color: var(--text);
+    background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 4px 10px; cursor: pointer; font-size: 1rem; transition: all 0.15s; color: var(--text);
   }
   .calendar-nav .nav-btn:hover { background: var(--bg); border-color: var(--primary); }
-  .calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
-    text-align: center;
-  }
-  .calendar-grid .day-header {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    padding: 6px 0;
-  }
-  .calendar-grid .day-cell {
-    position: relative;
-    padding: 6px 2px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: all 0.15s;
-    min-height: 38px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+  .calendar-grid .day-header { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); padding: 6px 0; }
+  .day-cell {
+    position: relative; padding: 6px 2px; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 0.8rem; transition: all 0.15s;
+    min-height: 38px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   }
   .day-cell:hover { background: var(--primary-light); }
-  .day-cell.today { 
-    background: var(--primary-light); 
-    color: var(--primary);
-    font-weight: 700;
-    border-radius: 8px;
-    outline: 2px solid var(--primary);
-    outline-offset: -2px;
-  }
-  .day-cell.today:hover { background: #ddd6fe; }
+  .day-cell.today { background: var(--primary-light); color: var(--primary); font-weight: 700; border-radius: 8px; outline: 2px solid var(--primary); outline-offset: -2px; }
   .day-cell.other-month { color: var(--text-muted); opacity: 0.4; }
   .day-cell.has-tasks::after {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
   }
   .day-cell.dot-all::after { background: var(--success); }
   .day-cell.dot-partial::after { background: var(--warning); }
   .day-cell.dot-none::after { background: var(--danger); }
 
-  /* ========== DAY DETAIL POPOVER ========== */
-  .day-detail {
-    margin-top: 12px;
-    padding: 12px;
-    background: var(--bg);
-    border-radius: var(--radius-sm);
-    display: none;
-  }
+  .day-detail { margin-top: 12px; padding: 12px; background: var(--bg); border-radius: var(--radius-sm); display: none; }
   .day-detail.active { display: block; }
-  .day-detail h3 {
-    font-size: 0.85rem;
-    margin-bottom: 8px;
-  }
-  .day-detail .history-task {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 0;
-    font-size: 0.8rem;
-  }
-  .day-detail .history-task .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .day-detail h3 { font-size: 0.85rem; margin-bottom: 8px; }
+  .day-detail .history-task { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 0.8rem; }
+  .day-detail .history-task .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .dot-done { background: var(--success); }
   .dot-undone { background: var(--danger); }
 
-  /* ========== EMPTY STATE ========== */
-  .empty {
-    text-align: center;
-    padding: 32px 16px;
-    color: var(--text-muted);
-  }
+  .empty { text-align: center; padding: 32px 16px; color: var(--text-muted); }
   .empty .emoji { font-size: 2.5rem; margin-bottom: 8px; }
   .empty p { font-size: 0.85rem; }
 
-  /* ========== STATS ========== */
-  .stats-row {
-    display: flex;
-    gap: 12px;
-    margin-top: 16px;
-    flex-wrap: wrap;
-  }
-  .stat-card {
-    flex: 1;
-    min-width: 80px;
-    background: var(--bg);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    text-align: center;
-  }
+  .stats-row { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+  .stat-card { flex: 1; min-width: 80px; background: var(--bg); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
   .stat-number { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
   .stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
 
-  /* ========== DIVIDER ========== */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 14px 0;
-  }
+  .divider { height: 1px; background: var(--border); margin: 12px 0; }
+  .settings-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.8rem; color: var(--text-secondary); }
+  .settings-row input { width: 52px; text-align: center; padding: 4px 6px; }
 
-  /* ========== SETTINGS ROW ========== */
-  .settings-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 14px;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-  }
-  .settings-row input {
-    width: 52px;
-    text-align: center;
-    padding: 4px 6px;
-  }
+  .legend-row { display: flex; gap: 12px; justify-content: center; margin-top: 12px; font-size: 0.7rem; color: var(--text-muted); flex-wrap: wrap; }
 </style>
 </head>
 <body>
 
 <header class="header">
-  <div class="header-title">
-    <span class="icon">🎲</span>
-    每日任务随机分配
-  </div>
+  <div class="header-title"><span class="icon">🎲</span>每日任务随机分配</div>
   <div class="header-actions">
     <span class="today-label" id="todayLabel"></span>
     <span class="badge" id="poolBadge">任务池: 0</span>
@@ -414,36 +215,41 @@
 
 <div class="main">
 
-  <!-- ===== LEFT: TASK POOL ===== -->
+  <!-- ===== TASK POOL ===== -->
   <section class="panel panel-tasks">
     <div class="panel-header">
       <h2>📋 任务池</h2>
       <span style="font-size:0.78rem;color:var(--text-muted)" id="poolCount">0 个任务</span>
     </div>
     <div class="panel-body">
-      <div class="form-row">
-        <div class="form-group" style="flex:2">
-          <label>任务名称</label>
-          <input type="text" id="taskNameInput" placeholder="例如：复习机械设计第三章" maxlength="80">
-        </div>
-        <div class="form-group" style="flex:1">
-          <label>截止日期</label>
-          <input type="date" id="taskDeadlineInput">
-        </div>
+      <div class="form-group">
+        <label>任务名称</label>
+        <input type="text" id="taskNameInput" placeholder="例如：复习机械设计第三章" maxlength="80">
       </div>
-      <button class="btn btn-primary" onclick="addTask()" style="width:100%;margin-top:8px;justify-content:center;">
-        ＋ 添加任务
-      </button>
+      <div class="form-group">
+        <label>截止日期</label>
+        <input type="date" id="taskDeadlineInput">
+      </div>
+      <div class="toggle-row" onclick="toggleSubFields()" id="toggleRow">
+        <div class="toggle-switch" id="toggleSwitch"></div>
+        <span>需要细分任务量</span>
+      </div>
+      <div class="sub-fields" id="subFields">
+        <div class="inline-row">
+          <span>总量：</span>
+          <input type="number" id="totalUnitsInput" value="20" min="1" max="999">
+          <input type="text" class="unit-input" id="unitLabelInput" placeholder="计量单位（如：页、集、道）" maxlength="10">
+        </div>
+        <div class="hint-text">💡 如「20页数学练习」「10集C++视频」——每日自动分配递增的完成量，越靠近截止日期分配越多。不勾选则为普通一次性任务。</div>
+      </div>
+      <button class="btn btn-primary" onclick="addTask()" style="width:100%;justify-content:center;">＋ 添加任务</button>
       <div class="divider"></div>
       <ul class="task-list" id="taskPoolList"></ul>
-      <div class="empty" id="poolEmpty">
-        <div class="emoji">📝</div>
-        <p>还没有任务，在上方添加吧</p>
-      </div>
+      <div class="empty" id="poolEmpty"><div class="emoji">📝</div><p>还没有任务，在上方添加吧</p></div>
     </div>
   </section>
 
-  <!-- ===== CENTER: TODAY ===== -->
+  <!-- ===== TODAY ===== -->
   <section class="panel">
     <div class="panel-header">
       <h2>🎯 今日任务</h2>
@@ -459,32 +265,18 @@
         <span style="color:var(--text-muted)">（1-10）</span>
       </div>
       <ul class="task-list" id="todayTaskList"></ul>
-      <div class="empty" id="todayEmpty">
-        <div class="emoji">🎲</div>
-        <p>点击「随机分配」生成今天的任务</p>
-      </div>
+      <div class="empty" id="todayEmpty"><div class="emoji">🎲</div><p>点击「随机分配」生成今天的任务</p></div>
       <div class="stats-row" id="todayStatsRow" style="display:none;">
-        <div class="stat-card">
-          <div class="stat-number" id="statAssigned">0</div>
-          <div class="stat-label">今日分配</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="statDone">0</div>
-          <div class="stat-label">已完成</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="statRemaining">0</div>
-          <div class="stat-label">剩余任务</div>
-        </div>
+        <div class="stat-card"><div class="stat-number" id="statAssigned">0</div><div class="stat-label">今日分配</div></div>
+        <div class="stat-card"><div class="stat-number" id="statDone">0</div><div class="stat-label">已完成</div></div>
+        <div class="stat-card"><div class="stat-number" id="statRemaining">0</div><div class="stat-label">剩余任务</div></div>
       </div>
     </div>
   </section>
 
-  <!-- ===== RIGHT: CALENDAR ===== -->
+  <!-- ===== CALENDAR ===== -->
   <section class="panel">
-    <div class="panel-header">
-      <h2>📅 日历</h2>
-    </div>
+    <div class="panel-header"><h2>📅 日历</h2></div>
     <div class="panel-body">
       <div class="calendar-nav">
         <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
@@ -493,7 +285,7 @@
       </div>
       <div class="calendar-grid" id="calendarGrid"></div>
       <div class="day-detail" id="dayDetail"></div>
-      <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;font-size:0.7rem;color:var(--text-muted)">
+      <div class="legend-row">
         <span>🟢 全部完成</span>
         <span>🟡 部分完成</span>
         <span>🔴 未完成</span>
@@ -505,161 +297,168 @@
 
 <script>
 // ============================================================
-// DATA MODEL
+// DATA
 // ============================================================
-const STORAGE_KEY = 'daily-task-randomizer-v2';
+const STORAGE_KEY = 'daily-task-randomizer-v3';
 
 function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
-  return {
-    tasks: [],
-    daily: {},
-    settings: { dailyCount: 3 }
-  };
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch (e) {}
+  return { tasks: [], daily: {}, settings: { dailyCount: 3 } };
 }
-
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
+function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 let DATA = loadData();
-let calYear, calMonth;
-let selectedDay = null;
+let calYear, calMonth, selectedDay = null;
+let subdividableOn = false;
 
 // ============================================================
 // HELPERS
 // ============================================================
-function todayStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function fmtDate(isoStr) {
-  if (!isoStr) return '';
-  const [y,m,d] = isoStr.split('-');
-  return `${Number(m)}月${Number(d)}日`;
-}
-
-function daysBetween(a, b) {
-  return Math.round((new Date(b) - new Date(a)) / (1000 * 60 * 60 * 24));
-}
-
+function todayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function fmtDate(iso) { if (!iso) return ''; const [y,m,d] = iso.split('-'); return `${Number(m)}月${Number(d)}日`; }
+function daysBetween(a, b) { return Math.round((new Date(b) - new Date(a)) / 86400000); }
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
-// Get all completed task IDs (done on ANY day)
-function getAllDoneIds() {
-  const done = new Set();
-  for (const date in DATA.daily) {
-    for (const id of DATA.daily[date].done || []) done.add(id);
+// Is a task FULLY complete?
+function isFullyComplete(task) {
+  if (task.subdividable) {
+    return (task.completedUnits || 0) >= (task.totalUnits || 1);
   }
-  return done;
+  // Normal task: check if in any day's done array
+  for (const d in DATA.daily) {
+    if ((DATA.daily[d].done || []).includes(task.id)) return true;
+  }
+  return false;
 }
 
-// Get uncompleted tasks
-function getUncompletedTasks() {
-  const doneIds = getAllDoneIds();
+// Get all fully complete task IDs
+function getFullyCompleteIds() {
+  const ids = new Set();
+  for (const t of DATA.tasks) {
+    if (isFullyComplete(t)) ids.add(t.id);
+  }
+  return ids;
+}
+
+// Get tasks still available / not fully done
+function getAvailableTasks() {
+  const doneIds = getFullyCompleteIds();
   return DATA.tasks.filter(t => !doneIds.has(t.id));
 }
 
-// Check if a task is done
-function isTaskDone(taskId) {
-  return getAllDoneIds().has(taskId);
+// Is a task done for TODAY (checked off)
+function isDoneToday(taskId) {
+  const td = DATA.daily[todayStr()];
+  return td && (td.done || []).includes(taskId);
 }
 
 // ============================================================
-// ALLOCATION ALGORITHM
+// SUBDIVISION: calculate daily units
+// ============================================================
+function calcDailyUnits(task) {
+  if (!task.subdividable) return null;
+  const remaining = (task.totalUnits || 0) - (task.completedUnits || 0);
+  if (remaining <= 0) return 0;
+  const ddl = new Date(task.deadline);
+  const today = new Date(todayStr());
+  const daysRemaining = Math.max(1, Math.ceil((ddl - today) / 86400000) + 1);
+  if (daysRemaining === 1) return remaining;
+  // Linear ramp: today=weight 1, last day=weight N
+  // Sum of weights = n(n+1)/2, k = 2*remaining / (n(n+1))
+  const n = daysRemaining;
+  const k = (2 * remaining) / (n * (n + 1));
+  return Math.max(1, Math.min(remaining, Math.round(k)));
+}
+
+// ============================================================
+// ALLOCATION
 // ============================================================
 function generateDailyTasks() {
-  const today = todayStr();
-  const uncompleted = getUncompletedTasks();
+  const todayDate = new Date(todayStr());
+  const available = getAvailableTasks();
   const count = DATA.settings.dailyCount || 3;
+  if (available.length === 0) return [];
 
-  if (uncompleted.length === 0) return [];
-
-  const todayDate = new Date(today);
-
-  // Calculate urgency weight for each task
-  const weighted = uncompleted.map(t => {
-    const deadline = new Date(t.deadline);
-    const daysRemaining = Math.max((deadline - todayDate) / (1000 * 60 * 60 * 24), 0.3);
-    
-    // Urgency: closer deadline = higher score; overdue gets extra boost
+  const weighted = available.map(t => {
+    const ddl = new Date(t.deadline);
+    const daysRemaining = Math.max((ddl - todayDate) / 86400000, 0.3);
     let urgency;
-    if (daysRemaining <= 0) {
-      urgency = 15; // Overdue — very urgent
-    } else if (daysRemaining <= 1) {
-      urgency = 8;
-    } else if (daysRemaining <= 3) {
-      urgency = 5 / daysRemaining;
-    } else if (daysRemaining <= 7) {
-      urgency = 3 / daysRemaining;
-    } else {
-      urgency = 1 / Math.sqrt(daysRemaining);
+    if (daysRemaining <= 0) urgency = 15;
+    else if (daysRemaining <= 1) urgency = 8;
+    else if (daysRemaining <= 3) urgency = 5 / daysRemaining;
+    else if (daysRemaining <= 7) urgency = 3 / daysRemaining;
+    else urgency = 1 / Math.sqrt(daysRemaining);
+
+    // Subdividable bonus: more remaining = more urgent to get distributed
+    if (t.subdividable) {
+      const remaining = (t.totalUnits || 0) - (t.completedUnits || 0);
+      const ratio = remaining / Math.max(t.totalUnits || 1, 1);
+      urgency *= (0.5 + ratio * 0.5); // Scale 0.5-1.0x
     }
 
-    // Add controlled randomness: 70% deterministic, 30% random jitter
-    const randomness = 0.7 + 0.6 * Math.random();
-    return { id: t.id, weight: urgency * randomness };
+    const rand = 0.7 + 0.6 * Math.random();
+    return { id: t.id, weight: urgency * rand };
   });
 
-  // Weighted random selection without replacement
   const selected = [];
   const remaining = [...weighted];
   const n = Math.min(count, remaining.length);
-
   for (let i = 0; i < n; i++) {
-    const totalWeight = remaining.reduce((s, w) => s + w.weight, 0);
-    if (totalWeight <= 0) break;
-    let rand = Math.random() * totalWeight;
-    let idx = 0;
-    for (; idx < remaining.length; idx++) {
-      rand -= remaining[idx].weight;
-      if (rand <= 0) break;
-    }
+    const totalW = remaining.reduce((s, w) => s + w.weight, 0);
+    if (totalW <= 0) break;
+    let rand = Math.random() * totalW, idx = 0;
+    for (; idx < remaining.length; idx++) { rand -= remaining[idx].weight; if (rand <= 0) break; }
     if (idx >= remaining.length) idx = remaining.length - 1;
     selected.push(remaining[idx].id);
     remaining.splice(idx, 1);
   }
-
   return selected;
 }
 
 // ============================================================
-// TASK POOL MANAGEMENT
+// TASK POOL
 // ============================================================
+function toggleSubFields() {
+  subdividableOn = !subdividableOn;
+  document.getElementById('toggleSwitch').classList.toggle('on', subdividableOn);
+  document.getElementById('subFields').classList.toggle('show', subdividableOn);
+}
+
 function addTask() {
-  const nameInput = document.getElementById('taskNameInput');
-  const deadlineInput = document.getElementById('taskDeadlineInput');
-  const name = nameInput.value.trim();
-  const deadline = deadlineInput.value;
+  const name = document.getElementById('taskNameInput').value.trim();
+  const deadline = document.getElementById('taskDeadlineInput').value;
+  if (!name) { document.getElementById('taskNameInput').focus(); return; }
+  if (!deadline) { document.getElementById('taskDeadlineInput').focus(); return; }
 
-  if (!name) { nameInput.focus(); return; }
-  if (!deadline) { deadlineInput.focus(); return; }
-
-  DATA.tasks.push({
+  const task = {
     id: genId(),
     name,
     deadline,
-    createdAt: todayStr()
-  });
+    createdAt: todayStr(),
+    subdividable: subdividableOn
+  };
 
+  if (subdividableOn) {
+    task.totalUnits = parseInt(document.getElementById('totalUnitsInput').value) || 1;
+    task.unitLabel = document.getElementById('unitLabelInput').value.trim() || '份';
+    task.completedUnits = 0;
+  }
+
+  DATA.tasks.push(task);
   saveData(DATA);
-  nameInput.value = '';
-  deadlineInput.value = '';
-  nameInput.focus();
+
+  // Reset form
+  document.getElementById('taskNameInput').value = '';
+  document.getElementById('taskDeadlineInput').value = '';
+  if (subdividableOn) toggleSubFields(); // reset toggle
+  document.getElementById('taskNameInput').focus();
   renderAll();
 }
 
 function deleteTask(id) {
-  // Remove from task pool
   DATA.tasks = DATA.tasks.filter(t => t.id !== id);
-  // Remove from daily assignments too
   for (const date in DATA.daily) {
     const d = DATA.daily[date];
-    d.assigned = (d.assigned || []).filter(a => a !== id);
+    d.assigned = (d.assigned || []).filter(a => (typeof a === 'string' ? a : a.id) !== id);
     d.done = (d.done || []).filter(a => a !== id);
   }
   saveData(DATA);
@@ -667,39 +466,64 @@ function deleteTask(id) {
 }
 
 // ============================================================
-// TODAY PANEL
+// TODAY
 // ============================================================
 function generateToday() {
-  const today = todayStr();
-  
-  // If already assigned today, confirm re-roll
-  if (DATA.daily[today] && DATA.daily[today].assigned && DATA.daily[today].assigned.length > 0) {
-    if (!confirm('今天已经分配过任务了，要重新随机分配吗？（之前的完成记录会保留在历史中）')) return;
-    // Keep done records but regenerate assigned
-    const oldDone = DATA.daily[today].done || [];
-    const newAssigned = generateDailyTasks();
-    DATA.daily[today] = { assigned: newAssigned, done: oldDone.filter(d => newAssigned.includes(d)) };
+  const td = todayStr();
+  if (DATA.daily[td] && DATA.daily[td].assigned && DATA.daily[td].assigned.length > 0) {
+    if (!confirm('今天已经分配过任务了，要重新随机分配吗？（之前的完成记录会保留）')) return;
+    const oldDone = DATA.daily[td].done || [];
+    const ids = generateDailyTasks();
+    const assigned = ids.map(id => {
+      const task = DATA.tasks.find(t => t.id === id);
+      if (task && task.subdividable) {
+        const units = calcDailyUnits(task);
+        return { id, units, label: task.unitLabel };
+      }
+      return id;
+    });
+    DATA.daily[td] = { assigned, done: oldDone.filter(d => ids.includes(typeof d === 'string' ? d : d.id)) };
   } else {
-    const assigned = generateDailyTasks();
-    DATA.daily[today] = { assigned, done: [] };
+    const ids = generateDailyTasks();
+    const assigned = ids.map(id => {
+      const task = DATA.tasks.find(t => t.id === id);
+      if (task && task.subdividable) {
+        const units = calcDailyUnits(task);
+        return { id, units, label: task.unitLabel };
+      }
+      return id;
+    });
+    DATA.daily[td] = { assigned, done: [] };
   }
-
   saveData(DATA);
   renderAll();
 }
 
 function toggleTaskDone(taskId) {
-  const today = todayStr();
-  if (!DATA.daily[today]) return;
-
-  const done = DATA.daily[today].done || [];
+  const td = todayStr();
+  if (!DATA.daily[td]) return;
+  const done = DATA.daily[td].done || [];
   const idx = done.indexOf(taskId);
+  const task = DATA.tasks.find(t => t.id === taskId);
+
   if (idx >= 0) {
+    // Un-check: undo
     done.splice(idx, 1);
+    if (task && task.subdividable) {
+      const entry = DATA.daily[td].assigned.find(a => (typeof a === 'string' ? a : a.id) === taskId);
+      const units = (entry && typeof entry === 'object') ? entry.units : 0;
+      task.completedUnits = Math.max(0, (task.completedUnits || 0) - units);
+    }
   } else {
+    // Check: complete
     done.push(taskId);
+    if (task && task.subdividable) {
+      const entry = DATA.daily[td].assigned.find(a => (typeof a === 'string' ? a : a.id) === taskId);
+      const units = (entry && typeof entry === 'object') ? entry.units : 0;
+      task.completedUnits = Math.min(task.totalUnits, (task.completedUnits || 0) + units);
+    }
   }
-  DATA.daily[today].done = done;
+  DATA.daily[td].done = done;
   saveData(DATA);
   renderAll();
 }
@@ -710,17 +534,11 @@ function toggleTaskDone(taskId) {
 function initCalendar() {
   const now = new Date();
   calYear = now.getFullYear();
-  calMonth = now.getMonth(); // 0-indexed
+  calMonth = now.getMonth();
   selectedDay = todayStr();
 }
-
-function changeMonth(delta) {
-  calMonth += delta;
-  if (calMonth < 0) { calMonth = 11; calYear--; }
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  selectedDay = null;
-  renderAll();
-}
+function changeMonth(d) { calMonth += d; if (calMonth < 0) { calMonth = 11; calYear--; } if (calMonth > 11) { calMonth = 0; calYear++; } selectedDay = null; renderAll(); }
+function selectDay(ds) { selectedDay = ds; renderAll(); }
 
 function getDayStatus(dateStr) {
   const day = DATA.daily[dateStr];
@@ -731,115 +549,8 @@ function getDayStatus(dateStr) {
   return 'partial';
 }
 
-function renderCalendar() {
-  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  document.getElementById('monthLabel').textContent = `${calYear}年 ${monthNames[calMonth]}`;
-
-  const dayHeaders = ['日','一','二','三','四','五','六'];
-  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-  const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
-
-  const grid = document.getElementById('calendarGrid');
-  grid.innerHTML = dayHeaders.map(h => `<div class="day-header">${h}</div>`).join('');
-
-  const today = todayStr();
-  let cells = '';
-
-  // Previous month padding
-  for (let i = firstDay - 1; i >= 0; i--) {
-    const d = daysInPrevMonth - i;
-    const m = calMonth === 0 ? 12 : calMonth;
-    const y = calMonth === 0 ? calYear - 1 : calYear;
-    const dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const status = getDayStatus(dateStr);
-    const cls = `day-cell other-month${status ? ' has-tasks dot-' + status : ''}`;
-    cells += `<div class="${cls}" onclick="selectDay('${dateStr}')">${d}</div>`;
-  }
-
-  // Current month
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const status = getDayStatus(dateStr);
-    const isToday = dateStr === today;
-    let cls = 'day-cell';
-    if (isToday) cls += ' today';
-    if (status) cls += ` has-tasks dot-${status}`;
-    if (dateStr === selectedDay && !isToday) cls += ' selected';
-    cells += `<div class="${cls}" onclick="selectDay('${dateStr}')">${d}</div>`;
-  }
-
-  // Next month padding
-  const totalCells = firstDay + daysInMonth;
-  const nextPadding = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-  for (let d = 1; d <= nextPadding; d++) {
-    const m = calMonth === 11 ? 1 : calMonth + 2;
-    const y = calMonth === 11 ? calYear + 1 : calYear;
-    const dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const status = getDayStatus(dateStr);
-    const cls = `day-cell other-month${status ? ' has-tasks dot-' + status : ''}`;
-    cells += `<div class="${cls}" onclick="selectDay('${dateStr}')">${d}</div>`;
-  }
-
-  grid.innerHTML += cells;
-  renderDayDetail();
-}
-
-function selectDay(dateStr) {
-  selectedDay = dateStr;
-  renderCalendar();
-}
-
-function renderDayDetail() {
-  const detail = document.getElementById('dayDetail');
-  if (!selectedDay) {
-    detail.classList.remove('active');
-    return;
-  }
-
-  const dayData = DATA.daily[selectedDay];
-  if (!dayData || !dayData.assigned || dayData.assigned.length === 0) {
-    detail.innerHTML = `<p style="font-size:0.8rem;color:var(--text-muted);">📭 ${fmtDate(selectedDay)} — 该日无任务记录</p>`;
-    detail.classList.add('active');
-    return;
-  }
-
-  const doneSet = new Set(dayData.done || []);
-  const tasksHtml = dayData.assigned.map(id => {
-    const task = DATA.tasks.find(t => t.id === id);
-    const name = task ? task.name : '(已删除的任务)';
-    const isDone = doneSet.has(id);
-    return `<div class="history-task">
-      <span class="dot ${isDone ? 'dot-done' : 'dot-undone'}"></span>
-      <span style="${isDone ? 'text-decoration:line-through;color:var(--text-muted)' : ''}">${name}</span>
-      ${isDone ? '<span style="color:var(--success);font-size:0.7rem;margin-left:auto">✓</span>' : ''}
-    </div>`;
-  }).join('');
-
-  const doneCount = doneSet.size;
-  const total = dayData.assigned.length;
-  const emoji = doneCount === total ? '🎉' : doneCount > 0 ? '🏃' : '😴';
-
-  detail.innerHTML = `
-    <h3>${emoji} ${fmtDate(selectedDay)} — ${doneCount}/${total} 完成</h3>
-    ${tasksHtml}
-  `;
-  detail.classList.add('active');
-}
-
 // ============================================================
-// SETTINGS
-// ============================================================
-function saveSettings() {
-  const input = document.getElementById('dailyCount');
-  const val = parseInt(input.value) || 3;
-  DATA.settings.dailyCount = Math.max(1, Math.min(10, val));
-  input.value = DATA.settings.dailyCount;
-  saveData(DATA);
-}
-
-// ============================================================
-// RENDER ALL
+// RENDER
 // ============================================================
 function renderAll() {
   renderTaskPool();
@@ -849,8 +560,8 @@ function renderAll() {
 }
 
 function renderHeader() {
-  const today = todayStr();
-  const [y,m,d] = today.split('-');
+  const td = todayStr();
+  const [y,m,d] = td.split('-');
   document.getElementById('todayLabel').textContent = `${y}年${Number(m)}月${Number(d)}日`;
   document.getElementById('poolBadge').textContent = `任务池: ${DATA.tasks.length}`;
 }
@@ -859,76 +570,78 @@ function renderTaskPool() {
   const list = document.getElementById('taskPoolList');
   const empty = document.getElementById('poolEmpty');
   const countEl = document.getElementById('poolCount');
-  const doneIds = getAllDoneIds();
-  const today = todayStr();
+  const doneIds = getFullyCompleteIds();
+  const avail = getAvailableTasks();
+  const td = todayStr();
 
-  countEl.textContent = `${DATA.tasks.length} 个任务 (${DATA.tasks.length - doneIds.size} 未完成)`;
-  
-  if (DATA.tasks.length === 0) {
-    list.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
+  countEl.textContent = `${DATA.tasks.length} 个任务 (${avail.length} 活跃)`;
+
+  if (DATA.tasks.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
 
-  // Sort: uncompleted first, then by deadline
   const sorted = [...DATA.tasks].sort((a, b) => {
-    const aDone = doneIds.has(a.id);
-    const bDone = doneIds.has(b.id);
+    const aDone = doneIds.has(a.id), bDone = doneIds.has(b.id);
     if (aDone !== bDone) return aDone ? 1 : -1;
     return a.deadline.localeCompare(b.deadline);
   });
 
   list.innerHTML = sorted.map(t => {
-    const done = doneIds.has(t.id);
-    const daysLeft = daysBetween(today, t.deadline);
-    let deadlineClass = '';
-    let deadlineText = '';
-    if (done) {
-      deadlineText = '✅ 已完成';
-      deadlineClass = '';
+    const fullyDone = doneIds.has(t.id);
+    const daysLeft = daysBetween(td, t.deadline);
+    let deadlineHtml = '';
+    if (fullyDone) {
+      deadlineHtml = '✅ 已完成';
     } else if (daysLeft < 0) {
-      deadlineText = `⚠️ 已过期 ${Math.abs(daysLeft)} 天`;
-      deadlineClass = 'urgent';
+      deadlineHtml = `<span class="urgent">⚠️ 已过期 ${Math.abs(daysLeft)} 天</span>`;
     } else if (daysLeft === 0) {
-      deadlineText = '🔴 今天截止！';
-      deadlineClass = 'urgent';
+      deadlineHtml = `<span class="urgent">🔴 今天截止</span>`;
     } else if (daysLeft <= 3) {
-      deadlineText = `🟡 剩余 ${daysLeft} 天`;
-      deadlineClass = 'soon';
+      deadlineHtml = `<span class="soon">🟡 剩余 ${daysLeft} 天</span>`;
     } else {
-      deadlineText = `📅 截止 ${fmtDate(t.deadline)}（${daysLeft} 天）`;
+      deadlineHtml = `📅 截止 ${fmtDate(t.deadline)}（${daysLeft} 天）`;
     }
 
-    return `<li class="task-item ${done ? 'done' : ''}">
-      <div class="task-info">
-        <div class="task-name">${escHtml(t.name)}</div>
-        <div class="task-deadline ${deadlineClass}">${deadlineText}</div>
+    let progressHtml = '';
+    if (t.subdividable) {
+      const done = t.completedUnits || 0;
+      const total = t.totalUnits || 0;
+      const pct = total > 0 ? Math.round(done / total * 100) : 0;
+      progressHtml = `<div class="progress-wrap">
+        <div class="progress-bar"><div class="fill" style="width:${pct}%"></div></div>
+        <span class="progress-text">${done}/${total} ${escHtml(t.unitLabel)}</span>
+      </div>`;
+    }
+
+    return `<li class="task-item ${fullyDone ? 'done' : ''}">
+      <div class="task-item-row">
+        <div class="task-info">
+          <div class="task-name">${escHtml(t.name)}${t.subdividable ? ' <span style="font-size:0.7rem;color:var(--primary);font-weight:600">[细分]</span>' : ''}</div>
+          <div class="task-meta">${deadlineHtml}</div>
+          ${progressHtml}
+        </div>
+        <button class="task-delete" onclick="deleteTask('${t.id}')" title="删除">🗑</button>
       </div>
-      <button class="task-delete" onclick="deleteTask('${t.id}')" title="删除任务">🗑</button>
     </li>`;
   }).join('');
 }
 
 function renderToday() {
-  const today = todayStr();
+  const td = todayStr();
   const list = document.getElementById('todayTaskList');
   const empty = document.getElementById('todayEmpty');
   const stats = document.getElementById('todayStats');
   const statsRow = document.getElementById('todayStatsRow');
   const genBtn = document.getElementById('generateBtn');
-
-  const dayData = DATA.daily[today];
-  const uncompletedCount = getUncompletedTasks().length;
+  const dayData = DATA.daily[td];
+  const avail = getAvailableTasks().length;
 
   if (!dayData || !dayData.assigned || dayData.assigned.length === 0) {
     list.innerHTML = '';
     empty.style.display = 'block';
     statsRow.style.display = 'none';
-    stats.textContent = uncompletedCount > 0 ? `${uncompletedCount} 个任务待分配` : '全部完成！';
+    stats.textContent = avail > 0 ? `${avail} 个任务待分配` : '全部完成！';
     genBtn.textContent = '🎲 随机分配';
-    if (uncompletedCount === 0) genBtn.disabled = true;
-    else genBtn.disabled = false;
+    genBtn.disabled = avail === 0;
     return;
   }
 
@@ -938,85 +651,151 @@ function renderToday() {
   genBtn.disabled = false;
 
   const doneSet = new Set(dayData.done || []);
-  const assignedCount = dayData.assigned.length;
+  const total = dayData.assigned.length;
   const doneCount = doneSet.size;
 
-  stats.textContent = `${doneCount}/${assignedCount} 完成`;
-
-  document.getElementById('statAssigned').textContent = assignedCount;
+  stats.textContent = `${doneCount}/${total} 完成`;
+  document.getElementById('statAssigned').textContent = total;
   document.getElementById('statDone').textContent = doneCount;
-  document.getElementById('statRemaining').textContent = uncompletedCount - doneCount;
+  document.getElementById('statRemaining').textContent = avail;
 
-  list.innerHTML = dayData.assigned.map(id => {
+  list.innerHTML = dayData.assigned.map(entry => {
+    const id = typeof entry === 'string' ? entry : entry.id;
     const task = DATA.tasks.find(t => t.id === id);
     if (!task) return '';
     const isDone = doneSet.has(id);
-    const daysLeft = daysBetween(today, task.deadline);
-    let deadlineClass = '';
-    let deadlineText = '';
-    if (daysLeft < 0) {
-      deadlineText = `⚠️ 已过期 ${Math.abs(daysLeft)} 天`;
-      deadlineClass = 'urgent';
-    } else if (daysLeft === 0) {
-      deadlineText = '🔴 今天截止';
-      deadlineClass = 'urgent';
-    } else if (daysLeft <= 3) {
-      deadlineText = `剩余 ${daysLeft} 天`;
-      deadlineClass = 'soon';
-    } else {
-      deadlineText = `剩余 ${daysLeft} 天`;
+    const daysLeft = daysBetween(td, task.deadline);
+    let dlClass = '', dlText = '';
+    if (daysLeft < 0) { dlText = `⚠️ 已过期 ${Math.abs(daysLeft)} 天`; dlClass = 'urgent'; }
+    else if (daysLeft === 0) { dlText = '🔴 今天截止'; dlClass = 'urgent'; }
+    else if (daysLeft <= 3) { dlText = `剩余 ${daysLeft} 天`; dlClass = 'soon'; }
+    else { dlText = `剩余 ${daysLeft} 天`; }
+
+    let taskNameHtml = escHtml(task.name);
+    if (task.subdividable && typeof entry === 'object' && entry.units) {
+      const remaining = (task.totalUnits || 0) - (task.completedUnits || 0);
+      taskNameHtml += ` — <strong>今日 ${entry.units} ${escHtml(entry.label)}</strong>`;
+      dlText = `总量${task.totalUnits}${escHtml(task.unitLabel)}，剩余${remaining}${escHtml(task.unitLabel)} · ${dlText}`;
     }
 
     return `<li class="task-item ${isDone ? 'done' : ''}">
-      <div class="task-checkbox ${isDone ? 'checked' : ''}" 
-           onclick="toggleTaskDone('${id}')" 
-           title="${isDone ? '取消完成' : '标记完成'}"></div>
-      <div class="task-info">
-        <div class="task-name">${escHtml(task.name)}</div>
-        <div class="task-deadline ${deadlineClass}">${deadlineText}</div>
+      <div class="task-item-row">
+        <div class="task-checkbox ${isDone ? 'checked' : ''}" onclick="toggleTaskDone('${id}')"></div>
+        <div class="task-info">
+          <div class="task-name">${taskNameHtml}</div>
+          <div class="task-meta"><span class="${dlClass}">${dlText}</span></div>
+        </div>
       </div>
     </li>`;
   }).join('');
 }
 
-function escHtml(s) {
-  const div = document.createElement('div');
-  div.textContent = s;
-  return div.innerHTML;
+function renderCalendar() {
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('monthLabel').textContent = `${calYear}年 ${monthNames[calMonth]}`;
+  const dayHeaders = ['日','一','二','三','四','五','六'];
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = dayHeaders.map(h => `<div class="day-header">${h}</div>`).join('');
+  const today = todayStr();
+  let cells = '';
+
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = daysInPrev - i;
+    const m = calMonth === 0 ? 12 : calMonth;
+    const y = calMonth === 0 ? calYear - 1 : calYear;
+    const ds = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const st = getDayStatus(ds);
+    cells += `<div class="day-cell other-month${st?' has-tasks dot-'+st:''}" onclick="selectDay('${ds}')">${d}</div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const st = getDayStatus(ds);
+    let cls = 'day-cell';
+    if (ds === today) cls += ' today';
+    if (st) cls += ` has-tasks dot-${st}`;
+    cells += `<div class="${cls}" onclick="selectDay('${ds}')">${d}</div>`;
+  }
+  const totalCells = firstDay + daysInMonth;
+  const pad = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let d = 1; d <= pad; d++) {
+    const m = calMonth === 11 ? 1 : calMonth + 2;
+    const y = calMonth === 11 ? calYear + 1 : calYear;
+    const ds = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const st = getDayStatus(ds);
+    cells += `<div class="day-cell other-month${st?' has-tasks dot-'+st:''}" onclick="selectDay('${ds}')">${d}</div>`;
+  }
+  grid.innerHTML += cells;
+  renderDayDetail();
 }
 
+function renderDayDetail() {
+  const detail = document.getElementById('dayDetail');
+  if (!selectedDay) { detail.classList.remove('active'); return; }
+  const dd = DATA.daily[selectedDay];
+  if (!dd || !dd.assigned || dd.assigned.length === 0) {
+    detail.innerHTML = `<p style="font-size:0.8rem;color:var(--text-muted)">📭 ${fmtDate(selectedDay)} — 该日无任务记录</p>`;
+    detail.classList.add('active'); return;
+  }
+  const doneSet = new Set(dd.done || []);
+  const tasksHtml = dd.assigned.map(entry => {
+    const id = typeof entry === 'string' ? entry : entry.id;
+    const task = DATA.tasks.find(t => t.id === id);
+    const name = task ? task.name : '(已删除)';
+    const isDone = doneSet.has(id);
+    let extra = '';
+    if (typeof entry === 'object' && entry.units) {
+      extra = ` <span style="font-size:0.7rem;color:var(--text-muted)">(${entry.units}${escHtml(entry.label||'')})</span>`;
+    }
+    return `<div class="history-task">
+      <span class="dot ${isDone?'dot-done':'dot-undone'}"></span>
+      <span style="${isDone?'text-decoration:line-through;color:var(--text-muted)':''}">${escHtml(name)}${extra}</span>
+      ${isDone?'<span style="color:var(--success);font-size:0.7rem;margin-left:auto">✓</span>':''}
+    </div>`;
+  }).join('');
+  const dc = doneSet.size, tc = dd.assigned.length;
+  const emoji = dc===tc?'🎉':dc>0?'🏃':'😴';
+  detail.innerHTML = `<h3>${emoji} ${fmtDate(selectedDay)} — ${dc}/${tc} 完成</h3>${tasksHtml}`;
+  detail.classList.add('active');
+}
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
 // ============================================================
-// KEYBOARD SHORTCUTS
+// SETTINGS & KEYBOARD
 // ============================================================
+function saveSettings() {
+  const v = parseInt(document.getElementById('dailyCount').value) || 3;
+  DATA.settings.dailyCount = Math.max(1, Math.min(10, v));
+  document.getElementById('dailyCount').value = DATA.settings.dailyCount;
+  saveData(DATA);
+}
+
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.activeElement === document.getElementById('taskNameInput')) {
-    e.preventDefault();
-    addTask();
-  }
-  if (e.key === 'Enter' && document.activeElement === document.getElementById('taskDeadlineInput')) {
-    e.preventDefault();
-    addTask();
-  }
+  if (e.key === 'Enter' && document.activeElement === document.getElementById('taskNameInput')) { e.preventDefault(); addTask(); }
+  if (e.key === 'Enter' && document.activeElement === document.getElementById('taskDeadlineInput')) { e.preventDefault(); addTask(); }
 });
 
 // ============================================================
 // INIT
 // ============================================================
 initCalendar();
-
-// Set default date to today for deadline input
-document.getElementById('taskDeadlineInput').value = '';
 document.getElementById('dailyCount').value = DATA.settings.dailyCount || 3;
 
-// Check if today's tasks need to be regenerated (new day)
 const today = todayStr();
-if (DATA.daily[today] && DATA.daily[today].assigned && DATA.daily[today].assigned.length > 0) {
-  // Tasks exist for today — just render
-} else {
-  // Auto-generate for today if there are uncompleted tasks
-  const uncompleted = getUncompletedTasks();
-  if (uncompleted.length > 0) {
-    const assigned = generateDailyTasks();
+if (!DATA.daily[today] || !DATA.daily[today].assigned || DATA.daily[today].assigned.length === 0) {
+  const avail = getAvailableTasks();
+  if (avail.length > 0) {
+    const ids = generateDailyTasks();
+    const assigned = ids.map(id => {
+      const task = DATA.tasks.find(t => t.id === id);
+      if (task && task.subdividable) {
+        return { id, units: calcDailyUnits(task), label: task.unitLabel };
+      }
+      return id;
+    });
     DATA.daily[today] = { assigned, done: [] };
     saveData(DATA);
   }
@@ -1024,6 +803,5 @@ if (DATA.daily[today] && DATA.daily[today].assigned && DATA.daily[today].assigne
 
 renderAll();
 </script>
-
 </body>
 </html>

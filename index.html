@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>每日任务随机分配</title>
+<title>THE_LONG_MARCH-1「"長征"一號機」</title>
 <style>
   :root {
     --bg: #fafafe;
@@ -47,8 +47,19 @@
     gap: 12px;
     position: sticky; top: 0; z-index: 100;
   }
-  .header-title { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .header-title { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; position: relative; cursor: default; }
   .header-title .icon { font-size: 1.5rem; }
+  .header-gif { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  .header-title:hover::after {
+    content: attr(data-tooltip);
+    position: absolute; top: calc(100% + 8px); left: 0;
+    background: #1e1b4b; color: #fff; padding: 7px 14px;
+    border-radius: 8px; font-size: 0.75rem; font-weight: 500;
+    white-space: nowrap; z-index: 1000;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    animation: tooltipIn 0.15s ease;
+  }
+  @keyframes tooltipIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
   .today-label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
   .badge { background: var(--primary-light); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
 
@@ -272,7 +283,10 @@
 <body>
 
 <header class="header">
-  <div class="header-title"><span class="icon">🎲</span>每日任务随机分配</div>
+  <div class="header-title" data-tooltip="只是一个每日任务智能分配工具(・ω< )★">
+    <img src="The_long_march.gif" class="header-gif" alt="">
+    <span>THE_LONG_MARCH-1「&quot;長征&quot;一號機」</span>
+  </div>
   <div class="header-actions">
     <span class="today-label" id="todayLabel"></span>
     <span class="badge" id="poolBadge">任务池: 0</span>

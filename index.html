@@ -220,6 +220,45 @@
     padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 10px;
     border: 1px solid #fcd34d; line-height: 1.5;
   }
+
+  /* About button + modal */
+  .about-btn {
+    position: fixed; bottom: 20px; right: 20px; width: 46px; height: 46px;
+    border-radius: 50%; border: none; background: var(--primary); color: white;
+    font-size: 1.3rem; cursor: pointer; box-shadow: 0 4px 14px rgba(124,58,237,0.4);
+    transition: all 0.2s; z-index: 1000;
+  }
+  .about-btn:hover { transform: translateY(-2px) scale(1.05); background: var(--primary-hover); }
+  .about-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 2000;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .about-overlay.show { display: flex; }
+  .about-modal {
+    background: white; border-radius: 16px; max-width: 560px; width: 100%;
+    max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    animation: aboutPop 0.2s ease;
+  }
+  @keyframes aboutPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .about-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: white; z-index: 1;
+  }
+  .about-head h2 { font-size: 1.1rem; font-weight: 700; }
+  .about-close {
+    background: none; border: none; font-size: 1.2rem; cursor: pointer;
+    color: var(--text-muted); padding: 4px 8px; border-radius: 6px; transition: all 0.15s;
+  }
+  .about-close:hover { background: var(--bg); color: var(--text); }
+  .about-body { padding: 20px 22px; font-size: 0.9rem; line-height: 1.7; color: var(--text); }
+  .about-body .about-lead { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 12px; }
+  .about-body h3 { font-size: 0.92rem; font-weight: 700; margin: 18px 0 6px; color: var(--text); }
+  .about-body p { margin: 6px 0; color: #374151; }
+  .about-body ul { margin: 6px 0; padding-left: 20px; }
+  .about-body li { margin: 4px 0; color: #374151; }
+  .about-body b { color: var(--text); }
+  .about-foot { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); color: #6b7280 !important; }
 </style>
 </head>
 <body>
@@ -1061,10 +1100,15 @@ function saveSettings() {
   saveData(DATA);
 }
 
+function toggleAbout() {
+  document.getElementById('aboutOverlay').classList.toggle('show');
+}
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.activeElement === document.getElementById('taskNameInput')) { e.preventDefault(); addTask(); }
   if (e.key === 'Enter' && document.activeElement === document.getElementById('taskDeadlineInput')) { e.preventDefault(); addTask(); }
   if (e.key === 'Escape' && editingTaskId) { e.preventDefault(); cancelEdit(); }
+  if (e.key === 'Escape' && document.getElementById('aboutOverlay').classList.contains('show')) { toggleAbout(); }
 });
 
 // ============================================================
@@ -1092,5 +1136,43 @@ if (!DATA.daily[today] || !DATA.daily[today].assigned || DATA.daily[today].assig
 
 renderAll();
 </script>
+
+<!-- ===== ABOUT BUTTON + MODAL ===== -->
+<button class="about-btn" onclick="toggleAbout()" title="设计理念">💡</button>
+<div class="about-overlay" id="aboutOverlay" onclick="if(event.target===this)toggleAbout()">
+  <div class="about-modal">
+    <div class="about-head">
+      <h2>🎲 设计理念</h2>
+      <button class="about-close" onclick="toggleAbout()">✕</button>
+    </div>
+    <div class="about-body">
+      <p class="about-lead">这个工具，是给「选择困难症」的一剂解药。</p>
+
+      <h3>为什么做这个？</h3>
+      <p>每天醒来，面对一堆要做的事，最累的往往不是做事本身，而是<b>「今天先做什么」</b>的纠结。与其在脑子里反复权衡，不如把任务全写进去，交给随机去决定——省下纠结的力气，直接开干。</p>
+
+      <h3>任务是怎么安排的？</h3>
+      <p>不是平均分配。核心逻辑是<b>「前松后紧」</b>：</p>
+      <ul>
+        <li><b>时间还长</b> → 每天少做一点，从容起步</li>
+        <li><b>时间不够</b> → 每天多做一点，稳步追赶</li>
+      </ul>
+      <p>具体的量按「剩余量 ÷ 剩余天数」为基准，再随截止日期临近温和上调（70% → 130%），既不会一开始就压得喘不过气，也不会拖到最后一天才疯狂赶工。</p>
+
+      <h3>你只需要做一件事</h3>
+      <p>每天勾一下「完成情况」。剩下的账，系统替你算——今天少做了，明天自动补；今天超额了，后面自然轻松。忘了勾也没关系，日历里随时能补录。</p>
+
+      <h3>几个小设计</h3>
+      <ul>
+        <li><b>细分任务</b>：像「20页练习」这种能拆量的，系统按进度每天给你拆好份量</li>
+        <li><b>优先级</b>：重要的多出现，必做的天天见</li>
+        <li><b>随机 + 权重</b>：既有惊喜感，又不会被纯粹随机坑到——截止近的任务更可能被抽中</li>
+      </ul>
+
+      <p class="about-foot">本质就一句话：<b>把「今天干什么」的决定权交出去，把精力留给真正做事。</b></p>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

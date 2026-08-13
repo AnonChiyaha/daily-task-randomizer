@@ -202,6 +202,19 @@
   .settings-row input { width: 52px; text-align: center; padding: 4px 6px; }
 
   .legend-row { display: flex; gap: 12px; justify-content: center; margin-top: 12px; font-size: 0.7rem; color: var(--text-muted); flex-wrap: wrap; }
+
+  /* Priority selector */
+  .priority-row { display: flex; gap: 6px; }
+  .priority-btn {
+    flex: 1; padding: 6px 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    background: white; cursor: pointer; font-size: 0.78rem; font-weight: 600;
+    font-family: var(--font); color: var(--text-secondary); transition: all 0.15s;
+  }
+  .priority-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .priority-btn.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+  .priority-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; }
+  .priority-tag.important { background: var(--warning-light); color: #b45309; }
+  .priority-tag.must { background: var(--danger-light); color: var(--danger); }
 </style>
 </head>
 <body>
@@ -242,6 +255,15 @@
           <input type="text" class="unit-input" id="unitLabelInput" placeholder="计量单位（如：页、集、道）" maxlength="10">
         </div>
         <div class="hint-text">💡 如「20页数学练习」「10集C++视频」——每日自动分配递增的完成量，越靠近截止日期分配越多。不勾选则为普通一次性任务。</div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>优先级（可选）</label>
+        <div class="priority-row" id="priorityRow">
+          <button type="button" class="priority-btn active" data-priority="normal" onclick="setPriority('normal')">普通</button>
+          <button type="button" class="priority-btn" data-priority="important" onclick="setPriority('important')">⭐ 重要</button>
+          <button type="button" class="priority-btn" data-priority="must" onclick="setPriority('must')">🔒 必做</button>
+        </div>
+        <div class="hint-text" id="priorityHint">普通任务按紧急度随机分配。</div>
       </div>
       <button class="btn btn-primary" onclick="addTask()" style="width:100%;justify-content:center;">＋ 添加任务</button>
       <div class="divider"></div>
@@ -310,6 +332,7 @@ function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)
 let DATA = loadData();
 let calYear, calMonth, selectedDay = null;
 let subdividableOn = false;
+let currentPriority = 'normal';
 let editingTaskId = null;
 
 // ============================================================
@@ -415,7 +438,14 @@ function generateDailyTasks() {
   const count = DATA.settings.dailyCount || 3;
   if (available.length === 0) return [];
 
-  const weighted = available.map(t => {
+  // 1. Must-do tasks: always selected first
+  const mustDo = available.filter(t => t.priority === 'must');
+  const mustIds = mustDo.map(t => t.id);
+
+  // 2. Remaining candidates (non-must tasks)
+  const candidates = available.filter(t => t.priority !== 'must');
+
+  const weighted = candidates.map(t => {
     const ddl = new Date(t.deadline);
     const daysRemaining = Math.max((ddl - todayDate) / 86400000, 0.3);
     let urgency;
@@ -432,14 +462,20 @@ function generateDailyTasks() {
       urgency *= (0.5 + ratio * 0.5); // Scale 0.5-1.0x
     }
 
+    // Important bonus: higher probability
+    if (t.priority === 'important') {
+      urgency *= 2.5;
+    }
+
     const rand = 0.7 + 0.6 * Math.random();
     return { id: t.id, weight: urgency * rand };
   });
 
-  const selected = [];
+  // 3. Weighted random selection for remaining slots
+  const selected = [...mustIds];
   const remaining = [...weighted];
-  const n = Math.min(count, remaining.length);
-  for (let i = 0; i < n; i++) {
+  const n = Math.min(count, selected.length + remaining.length);
+  for (let i = selected.length; i < n; i++) {
     const totalW = remaining.reduce((s, w) => s + w.weight, 0);
     if (totalW <= 0) break;
     let rand = Math.random() * totalW, idx = 0;
@@ -460,6 +496,17 @@ function toggleSubFields() {
   document.getElementById('subFields').classList.toggle('show', subdividableOn);
 }
 
+function setPriority(p) {
+  currentPriority = p;
+  document.querySelectorAll('.priority-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.priority === p);
+  });
+  const hint = document.getElementById('priorityHint');
+  if (p === 'important') hint.textContent = '重要任务被抽中的概率提升（权重×2.5）。';
+  else if (p === 'must') hint.textContent = '必做任务每天一定会被抽中（直到完成为止）。';
+  else hint.textContent = '普通任务按紧急度随机分配。';
+}
+
 function addTask() {
   const name = document.getElementById('taskNameInput').value.trim();
   const deadline = document.getElementById('taskDeadlineInput').value;
@@ -471,7 +518,8 @@ function addTask() {
     name,
     deadline,
     createdAt: todayStr(),
-    subdividable: subdividableOn
+    subdividable: subdividableOn,
+    priority: currentPriority || 'normal'
   };
 
   if (subdividableOn) {
@@ -487,6 +535,7 @@ function addTask() {
   document.getElementById('taskNameInput').value = '';
   document.getElementById('taskDeadlineInput').value = '';
   if (subdividableOn) toggleSubFields(); // reset toggle
+  if (currentPriority !== 'normal') setPriority('normal'); // reset priority
   document.getElementById('taskNameInput').focus();
   renderAll();
 }
@@ -530,11 +579,24 @@ function renderEditForm(t) {
       <div class="form-group"><label>总量</label><input type="number" id="edit-units" value="${t.totalUnits||0}" min="1" max="999"></div>
       <div class="form-group"><label>单位</label><input type="text" id="edit-label" value="${escHtml(t.unitLabel||'')}" maxlength="10"></div>
     </div>` : ''}
+    <div class="form-group" style="margin-bottom:8px;">
+      <label>优先级</label>
+      <div class="priority-row">
+        <button type="button" class="priority-btn ${t.priority!=='important'&&t.priority!=='must'?'active':''}" onclick="editSetPriority('${t.id}','normal')">普通</button>
+        <button type="button" class="priority-btn ${t.priority==='important'?'active':''}" onclick="editSetPriority('${t.id}','important')">⭐ 重要</button>
+        <button type="button" class="priority-btn ${t.priority==='must'?'active':''}" onclick="editSetPriority('${t.id}','must')">🔒 必做</button>
+      </div>
+    </div>
     <div style="display:flex;gap:6px;">
       <button class="btn btn-primary btn-sm" onclick="saveEdit('${t.id}')">保存</button>
       <button class="btn btn-ghost btn-sm" onclick="cancelEdit()">取消</button>
     </div>
   </div>`;
+}
+
+function editSetPriority(id, p) {
+  const task = DATA.tasks.find(t => t.id === id);
+  if (task) { task.priority = p; saveData(DATA); renderAll(); }
 }
 
 // ============================================================
@@ -709,7 +771,7 @@ function renderTaskPool() {
       ${editingTaskId === t.id ? renderEditForm(t) : `
       <div class="task-item-row">
         <div class="task-info">
-          <div class="task-name">${escHtml(t.name)}${t.subdividable ? ' <span style="font-size:0.7rem;color:var(--primary);font-weight:600">[细分]</span>' : ''}</div>
+          <div class="task-name">${escHtml(t.name)}${t.subdividable ? ' <span style="font-size:0.7rem;color:var(--primary);font-weight:600">[细分]</span>' : ''}${t.priority === 'important' ? ' <span class="priority-tag important">⭐ 重要</span>' : ''}${t.priority === 'must' ? ' <span class="priority-tag must">🔒 必做</span>' : ''}</div>
           <div class="task-meta">${deadlineHtml}</div>
           ${progressHtml}
         </div>

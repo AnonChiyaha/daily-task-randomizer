@@ -259,6 +259,14 @@
   .about-body li { margin: 4px 0; color: #374151; }
   .about-body b { color: var(--text); }
   .about-foot { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); color: #6b7280 !important; }
+  .about-author {
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);
+    text-align: center; font-size: 0.82rem; color: var(--text-secondary);
+  }
+  .about-author-made { font-size: 0.9rem; margin-bottom: 4px; }
+  .about-author-social a { color: var(--primary); text-decoration: none; font-weight: 600; }
+  .about-author-social a:hover { text-decoration: underline; }
+  .about-author-welcome { margin-top: 6px; color: var(--text-muted); font-size: 0.8rem; }
 </style>
 </head>
 <body>
@@ -1138,15 +1146,15 @@ renderAll();
 </script>
 
 <!-- ===== ABOUT BUTTON + MODAL ===== -->
-<button class="about-btn" onclick="toggleAbout()" title="设计理念">💡</button>
+<button class="about-btn" onclick="toggleAbout()" title="来自制作者">💡</button>
 <div class="about-overlay" id="aboutOverlay" onclick="if(event.target===this)toggleAbout()">
   <div class="about-modal">
     <div class="about-head">
-      <h2>🎲 设计理念</h2>
+      <h2>来自制作者</h2>
       <button class="about-close" onclick="toggleAbout()">✕</button>
     </div>
     <div class="about-body">
-      <p class="about-lead">这个工具，是给「选择困难症」的一剂解药。</p>
+      <p class="about-lead">献给「选择困难症」的你们，也献给「选择困难症」的自己。</p>
 
       <h3>为什么做这个？</h3>
       <p>每天醒来，面对一堆要做的事，最累的往往不是做事本身，而是<b>「今天先做什么」</b>的纠结。与其在脑子里反复权衡，不如把任务全写进去，交给随机去决定——省下纠结的力气，直接开干。</p>
@@ -1169,7 +1177,15 @@ renderAll();
         <li><b>随机 + 权重</b>：既有惊喜感，又不会被纯粹随机坑到——截止近的任务更可能被抽中</li>
       </ul>
 
-      <p class="about-foot">本质就一句话：<b>把「今天干什么」的决定权交出去，把精力留给真正做事。</b></p>
+      <p class="about-foot"><b>道别「今天该干什么」的决策内耗，把全部心力留给真正的行动。</b></p>
+
+      <div class="about-author">
+        <div class="about-author-made">made by <b>AnonChiyaha</b></div>
+        <div class="about-author-social">
+          哔哩哔哩：<a href="https://space.bilibili.com/333135120" target="_blank" rel="noopener">space.bilibili.com/333135120</a>
+        </div>
+        <div class="about-author-welcome">欢迎来找我玩 ✨</div>
+      </div>
     </div>
   </div>
 </div>

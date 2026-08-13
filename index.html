@@ -215,6 +215,11 @@
   .priority-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; }
   .priority-tag.important { background: var(--warning-light); color: #b45309; }
   .priority-tag.must { background: var(--danger-light); color: var(--danger); }
+  .must-warning {
+    background: var(--warning-light); color: #92400e; font-size: 0.78rem;
+    padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 10px;
+    border: 1px solid #fcd34d; line-height: 1.5;
+  }
 </style>
 </head>
 <body>
@@ -287,6 +292,7 @@
         <input type="number" id="dailyCount" value="3" min="1" max="10" onchange="saveSettings()">
         <span style="color:var(--text-muted)">（1-10）</span>
       </div>
+      <div class="must-warning" id="mustWarning" style="display:none;"></div>
       <ul class="task-list" id="todayTaskList"></ul>
       <div class="empty" id="todayEmpty"><div class="emoji">🎲</div><p>点击「随机分配」生成今天的任务</p></div>
       <div class="stats-row" id="todayStatsRow" style="display:none;">
@@ -502,9 +508,21 @@ function setPriority(p) {
     b.classList.toggle('active', b.dataset.priority === p);
   });
   const hint = document.getElementById('priorityHint');
-  if (p === 'important') hint.textContent = '重要任务被抽中的概率提升（权重×2.5）。';
-  else if (p === 'must') hint.textContent = '必做任务每天一定会被抽中（直到完成为止）。';
-  else hint.textContent = '普通任务按紧急度随机分配。';
+  hint.style.color = '';
+  if (p === 'important') {
+    hint.textContent = '重要任务被抽中的概率提升（权重×2.5）。';
+  } else if (p === 'must') {
+    const dailyCount = DATA.settings.dailyCount || 3;
+    const mustCount = getAvailableTasks().filter(t => t.priority === 'must').length;
+    if (mustCount + 1 > dailyCount) {
+      hint.textContent = `⚠️ 必做任务将达 ${mustCount + 1} 个，超过每日任务数 ${dailyCount}，会全部显示。`;
+      hint.style.color = 'var(--danger)';
+    } else {
+      hint.textContent = '必做任务每天一定会被抽中（直到完成为止）。';
+    }
+  } else {
+    hint.textContent = '普通任务按紧急度随机分配。';
+  }
 }
 
 function addTask() {
@@ -806,6 +824,17 @@ function renderToday() {
   statsRow.style.display = 'flex';
   genBtn.textContent = '🔄 重新分配';
   genBtn.disabled = false;
+
+  // Must-do overflow warning
+  const mustWarn = document.getElementById('mustWarning');
+  const dailyCount = DATA.settings.dailyCount || 3;
+  if (dayData.assigned.length > dailyCount) {
+    const mustCount = getAvailableTasks().filter(t => t.priority === 'must').length;
+    mustWarn.style.display = 'block';
+    mustWarn.innerHTML = `⚠️ 当前有 <strong>${mustCount}</strong> 个必做任务，超过每日任务数 <strong>${dailyCount}</strong>，已全部显示。可在编辑中调整优先级或提高每日任务数。`;
+  } else {
+    mustWarn.style.display = 'none';
+  }
 
   const doneSet = new Set(); // We need to track done by id, even for {id, units} objects
   (dayData.done || []).forEach(d => doneSet.add(typeof d === 'string' ? d : d.id));

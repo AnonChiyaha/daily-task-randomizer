@@ -284,6 +284,26 @@
     font-size: 0.72rem; color: var(--text-muted);
   }
   .about-counter .counter-sep { color: var(--border); }
+
+  /* About tabs */
+  .about-tabs { display: flex; gap: 6px; }
+  .about-tab {
+    padding: 7px 16px; border: none; border-radius: 8px; cursor: pointer;
+    font-size: 0.88rem; font-weight: 600; font-family: var(--font);
+    color: var(--text-secondary); background: var(--bg); transition: all 0.15s;
+  }
+  .about-tab:hover { color: var(--primary); }
+  .about-tab.active { background: var(--primary); color: white; }
+  .about-tab-content { display: none; }
+  .about-tab-content.active { display: block; }
+
+  /* Changelog */
+  .changelog .cl-entry { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .changelog .cl-entry:last-child { border-bottom: none; }
+  .cl-version { font-weight: 700; font-size: 0.88rem; color: var(--text); margin-bottom: 3px; }
+  .cl-name { font-weight: 500; color: var(--primary); font-size: 0.78rem; margin-left: 6px; }
+  .cl-item { font-size: 0.8rem; color: #6b7280; padding: 1px 0 1px 12px; position: relative; }
+  .cl-item::before { content: '·'; position: absolute; left: 2px; color: var(--text-muted); }
 </style>
 </head>
 <body>
@@ -1132,6 +1152,15 @@ function toggleAbout() {
   document.getElementById('aboutOverlay').classList.toggle('show');
 }
 
+function switchAboutTab(tab) {
+  document.querySelectorAll('.about-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  document.querySelectorAll('.about-tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === 'about-tab-' + tab);
+  });
+}
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.activeElement === document.getElementById('taskNameInput')) { e.preventDefault(); addTask(); }
   if (e.key === 'Enter' && document.activeElement === document.getElementById('taskDeadlineInput')) { e.preventDefault(); addTask(); }
@@ -1170,10 +1199,14 @@ renderAll();
 <div class="about-overlay" id="aboutOverlay" onclick="if(event.target===this)toggleAbout()">
   <div class="about-modal">
     <div class="about-head">
-      <h2>来自制作者</h2>
+      <div class="about-tabs">
+        <button class="about-tab active" data-tab="about" onclick="switchAboutTab('about')">来自制作者</button>
+        <button class="about-tab" data-tab="changelog" onclick="switchAboutTab('changelog')">更新日志</button>
+      </div>
       <button class="about-close" onclick="toggleAbout()">✕</button>
     </div>
     <div class="about-body">
+      <div class="about-tab-content active" id="about-tab-about">
       <p class="about-lead">献给「选择困难症」的你们，也献给「选择困难症」的自己。</p>
 
       <h3>为什么做这个？</h3>
@@ -1211,6 +1244,54 @@ renderAll();
         <span id="busuanzi_container_site_pv">🌐 总访问量 <span id="busuanzi_value_site_pv"></span> 次</span>
         <span class="counter-sep">·</span>
         <span id="busuanzi_container_site_uv">👤 访客数 <span id="busuanzi_value_site_uv"></span> 人</span>
+      </div>
+      </div>
+
+      <div class="about-tab-content" id="about-tab-changelog">
+        <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v2.1.0 <span class="cl-name">访客计数</span></div>
+            <div class="cl-item">接入不蒜子计数器</div>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-version">v2.0.0 <span class="cl-name">正式命名</span></div>
+            <div class="cl-item">更名 THE_LONG_MARCH_1「"長征"一號機」</div>
+            <div class="cl-item">添加动图，添加鼠标悬停标题</div>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-version">v1.6.0 <span class="cl-name">关于弹窗</span></div>
+            <div class="cl-item">添加 💡 按钮</div>
+            <div class="cl-item">加入内容：来自制作者</div>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-version">v1.5.0 <span class="cl-name">优先级</span></div>
+            <div class="cl-item">添加优先级系统</div>
+            <div class="cl-item">必做任务超限警告</div>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-version">v1.4.0 <span class="cl-name">超额完成</span></div>
+            <div class="cl-item">添加超额完成系统</div>
+            <div class="cl-item">加入超额判断功能</div>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-version">v1.3.0 <span class="cl-name">部分完成 + 日历补录</span></div>
+            <div class="cl-item">实际完成量独立输入</div>
+            <div class="cl-item">日历可补录历史</div>
+            <div class="cl-item">修复了部分完成显示错误的bug</div>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-version">v1.2.0 <span class="cl-name">算法优化</span></div>
+            <div class="cl-item">优化分配算法</div>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-version">v1.1.0 <span class="cl-name">任务细分</span></div>
+            <div class="cl-item">总量 + 单位，每日自动拆分，可追踪进度</div>
+          </div>
+          <div class="cl-entry">
+            <div class="cl-version">v1.0.0 <span class="cl-name">初版</span></div>
+            <div class="cl-item">任务池、随机分配、月历、完成勾选</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

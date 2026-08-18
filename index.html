@@ -142,12 +142,22 @@
     font-size: 1rem; padding: 4px; border-radius: 4px; transition: all 0.15s; flex-shrink: 0;
   }
   .task-delete:hover { color: var(--danger); background: var(--danger-light); }
-  .group-header {
-    font-size: 0.7rem; font-weight: 700; color: var(--text-muted);
-    padding: 12px 4px 4px; margin-top: 6px; letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--border);
+  .pool-tabs { display: flex; gap: 4px; background: var(--bg); padding: 3px; border-radius: 8px; margin-bottom: 8px; }
+  .pool-tab {
+    flex: 1; padding: 6px 8px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 0.8rem; font-weight: 600; font-family: var(--font);
+    color: var(--text-secondary); background: transparent; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
   }
-  .group-header:first-child { margin-top: 0; padding-top: 2px; }
+  .pool-tab:hover { color: var(--primary); }
+  .pool-tab.active { background: white; color: var(--primary); box-shadow: var(--shadow); }
+  .pool-tab-count {
+    background: var(--primary-light); color: var(--primary);
+    font-size: 0.68rem; font-weight: 700; padding: 0 7px; border-radius: 10px;
+  }
+  .pool-tab.active .pool-tab-count { background: var(--primary); color: white; }
+  .pool-tab-content { display: none; }
+  .pool-tab-content.active { display: block; }
 
   /* Progress bar */
   .progress-wrap { margin-top: 4px; display: flex; align-items: center; gap: 6px; }
@@ -365,8 +375,18 @@
       </div>
       <button class="btn btn-primary" onclick="addTask()" style="width:100%;justify-content:center;">＋ 添加任务</button>
       <div class="divider"></div>
-      <ul class="task-list" id="taskPoolList"></ul>
-      <div class="empty" id="poolEmpty"><div class="emoji">📝</div><p>还没有任务，在上方添加吧</p></div>
+      <div class="pool-tabs">
+        <button class="pool-tab active" id="poolTabActive" onclick="switchPoolTab('active')">进行中 <span class="pool-tab-count" id="poolCountActive">0</span></button>
+        <button class="pool-tab" id="poolTabDone" onclick="switchPoolTab('done')">已完成 <span class="pool-tab-count" id="poolCountDone">0</span></button>
+      </div>
+      <div class="pool-tab-content active" id="poolTabContentActive">
+        <ul class="task-list" id="taskPoolListActive"></ul>
+        <div class="empty" id="poolEmptyActive"><div class="emoji">📝</div><p>暂无进行中的任务</p></div>
+      </div>
+      <div class="pool-tab-content" id="poolTabContentDone">
+        <ul class="task-list" id="taskPoolListDone"></ul>
+        <div class="empty" id="poolEmptyDone"><div class="emoji">🎉</div><p>暂无已完成的任务</p></div>
+      </div>
     </div>
   </section>
 
@@ -433,6 +453,7 @@ let calYear, calMonth, selectedDay = null;
 let subdividableOn = false;
 let currentPriority = 'normal';
 let editingTaskId = null;
+let poolTab = 'active';
 
 // ============================================================
 // HELPERS
@@ -833,8 +854,6 @@ function renderHeader() {
 }
 
 function renderTaskPool() {
-  const list = document.getElementById('taskPoolList');
-  const empty = document.getElementById('poolEmpty');
   const countEl = document.getElementById('poolCount');
   const doneIds = getFullyCompleteIds();
   const avail = getAvailableTasks();
@@ -842,23 +861,30 @@ function renderTaskPool() {
 
   countEl.textContent = `${DATA.tasks.length} 个任务 (${avail.length} 活跃)`;
 
-  if (DATA.tasks.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-
   const byDeadline = (a, b) => a.deadline.localeCompare(b.deadline);
   const active = DATA.tasks.filter(t => !doneIds.has(t.id)).sort(byDeadline);
   const completed = DATA.tasks.filter(t => doneIds.has(t.id)).sort(byDeadline);
 
-  let html = '';
-  if (active.length > 0) {
-    html += `<li class="group-header">📌 进行中（${active.length}）</li>`;
-    html += active.map(t => taskItemHtml(t, false, td)).join('');
-  }
-  if (completed.length > 0) {
-    html += `<li class="group-header">✅ 已完成（${completed.length}）</li>`;
-    html += completed.map(t => taskItemHtml(t, true, td)).join('');
-  }
-  list.innerHTML = html;
+  document.getElementById('poolCountActive').textContent = active.length;
+  document.getElementById('poolCountDone').textContent = completed.length;
+
+  const listActive = document.getElementById('taskPoolListActive');
+  const emptyActive = document.getElementById('poolEmptyActive');
+  listActive.innerHTML = active.map(t => taskItemHtml(t, false, td)).join('');
+  emptyActive.style.display = active.length === 0 ? 'block' : 'none';
+
+  const listDone = document.getElementById('taskPoolListDone');
+  const emptyDone = document.getElementById('poolEmptyDone');
+  listDone.innerHTML = completed.map(t => taskItemHtml(t, true, td)).join('');
+  emptyDone.style.display = completed.length === 0 ? 'block' : 'none';
+}
+
+function switchPoolTab(tab) {
+  poolTab = tab;
+  document.getElementById('poolTabActive').classList.toggle('active', tab === 'active');
+  document.getElementById('poolTabDone').classList.toggle('active', tab === 'done');
+  document.getElementById('poolTabContentActive').classList.toggle('active', tab === 'active');
+  document.getElementById('poolTabContentDone').classList.toggle('active', tab === 'done');
 }
 
 function taskItemHtml(t, fullyDone, td) {
@@ -1263,6 +1289,10 @@ renderAll();
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v2.4.0 <span class="cl-name">任务池标签页</span></div>
+            <div class="cl-item">进行中 / 已完成改为两个标签页</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v2.3.0 <span class="cl-name">界面优化</span></div>
             <div class="cl-item">修复日历部分完成涂满黄色的bug</div>

@@ -163,6 +163,13 @@
   .goal-date-btn.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
   .goal-date-row { display: flex; margin-bottom: 8px; }
   .goal-date-row input { width: 100%; }
+  .drag-handle {
+    cursor: grab; color: var(--text-muted); flex-shrink: 0;
+    font-size: 0.95rem; user-select: none; line-height: 1;
+    padding: 3px 4px; border-radius: 4px; align-self: center;
+  }
+  .drag-handle:hover { color: var(--primary); background: var(--bg); }
+  .drag-handle:active { cursor: grabbing; }
 
   /* Progress bar */
   .progress-wrap { margin-top: 4px; display: flex; align-items: center; gap: 6px; }
@@ -482,6 +489,7 @@ let editingTaskId = null;
 let poolTab = 'active';
 let goalDateOn = false;
 let editingGoalId = null;
+let dragType = null, dragId = null;
 
 // ============================================================
 // HELPERS
@@ -891,7 +899,7 @@ function renderTaskPool() {
   countEl.textContent = `${DATA.tasks.length} 个任务 (${avail.length} 活跃)`;
 
   const byDeadline = (a, b) => a.deadline.localeCompare(b.deadline);
-  const active = DATA.tasks.filter(t => !doneIds.has(t.id)).sort(byDeadline);
+  const active = DATA.tasks.filter(t => !doneIds.has(t.id)); // 手动顺序
   const completed = DATA.tasks.filter(t => doneIds.has(t.id)).sort(byDeadline);
 
   document.getElementById('poolCountActive').textContent = active.length;
@@ -939,8 +947,9 @@ function renderGoals() {
       else if (daysLeft <= 7) deadlineHtml = `<span class="soon">🟡 剩余 ${daysLeft} 天</span>`;
       else deadlineHtml = `📅 截止 ${fmtDate(g.deadline)}（${daysLeft} 天）`;
     }
-    return `<li class="task-item ${g.done ? 'done' : ''}">
+    return `<li class="task-item ${g.done ? 'done' : ''}" ondragover="event.preventDefault()" ondrop="dropOn('goal','${g.id}')">
       <div class="task-item-row">
+        <span class="drag-handle" draggable="true" ondragstart="dragStart('goal','${g.id}')" title="拖动排序">⠿</span>
         <div class="task-checkbox ${g.done ? 'checked' : ''}" onclick="toggleGoal('${g.id}')"></div>
         <div class="task-info">
           <div class="task-name">${escHtml(g.text)}</div>
@@ -1021,6 +1030,29 @@ function toggleGoal(id) {
   if (goal) { goal.done = !goal.done; saveData(DATA); renderAll(); }
 }
 
+// ============================================================
+// DRAG REORDER
+// ============================================================
+function dragStart(type, id) {
+  dragType = type;
+  dragId = id;
+}
+
+function dropOn(type, targetId) {
+  if (dragType !== type || !dragId || dragId === targetId) { dragType = null; dragId = null; return; }
+  const arr = type === 'goal' ? (DATA.goals || []) : DATA.tasks;
+  const fromIdx = arr.findIndex(x => x.id === dragId);
+  const toIdx = arr.findIndex(x => x.id === targetId);
+  if (fromIdx < 0 || toIdx < 0) { dragType = null; dragId = null; return; }
+  const [item] = arr.splice(fromIdx, 1);
+  let insertAt = arr.findIndex(x => x.id === targetId);
+  if (fromIdx < toIdx) insertAt += 1; // 往下拖：插到目标之后
+  arr.splice(insertAt, 0, item);
+  saveData(DATA);
+  renderAll();
+  dragType = null; dragId = null;
+}
+
 function taskItemHtml(t, fullyDone, td) {
   const daysLeft = daysBetween(td, t.deadline);
   let deadlineHtml = '';
@@ -1047,9 +1079,13 @@ function taskItemHtml(t, fullyDone, td) {
     </div>`;
   }
 
-  return `<li class="task-item ${fullyDone ? 'done' : ''}">
+  const dragHandle = fullyDone ? '' : `<span class="drag-handle" draggable="true" ondragstart="dragStart('task','${t.id}')" title="拖动排序">⠿</span>`;
+  const dndAttrs = fullyDone ? '' : ` ondragover="event.preventDefault()" ondrop="dropOn('task','${t.id}')"`;
+
+  return `<li class="task-item ${fullyDone ? 'done' : ''}"${dndAttrs}>
     ${editingTaskId === t.id ? renderEditForm(t) : `
     <div class="task-item-row">
+      ${dragHandle}
       <div class="task-info">
         <div class="task-name">${escHtml(t.name)}${t.subdividable ? ' <span style="font-size:0.7rem;color:var(--primary);font-weight:600">[细分]</span>' : ''}${t.priority === 'important' ? ' <span class="priority-tag important">⭐ 重要</span>' : ''}${t.priority === 'must' ? ' <span class="priority-tag must">🔒 必做</span>' : ''}</div>
         <div class="task-meta">${deadlineHtml}</div>
@@ -1425,6 +1461,10 @@ renderAll();
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v2.8.0 <span class="cl-name">拖动排序</span></div>
+            <div class="cl-item">目标与进行中任务可拖动调整顺序</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v2.7.0 <span class="cl-name">目标编辑</span></div>
             <div class="cl-item">已写下的目标可编辑（内容 + 截止日期）</div>

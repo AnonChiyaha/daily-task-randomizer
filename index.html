@@ -481,6 +481,7 @@ let currentPriority = 'normal';
 let editingTaskId = null;
 let poolTab = 'active';
 let goalDateOn = false;
+let editingGoalId = null;
 
 // ============================================================
 // HELPERS
@@ -929,6 +930,7 @@ function renderGoals() {
   const td = todayStr();
 
   list.innerHTML = goals.map(g => {
+    if (editingGoalId === g.id) return renderGoalEditForm(g);
     let deadlineHtml = '';
     if (g.deadline) {
       const daysLeft = daysBetween(td, g.deadline);
@@ -944,12 +946,46 @@ function renderGoals() {
           <div class="task-name">${escHtml(g.text)}</div>
           ${deadlineHtml ? `<div class="task-meta">${deadlineHtml}</div>` : ''}
         </div>
+        <button class="task-delete" onclick="startGoalEdit('${g.id}')" title="编辑" style="margin-right:2px;">✏️</button>
         <button class="task-delete" onclick="deleteGoal('${g.id}')" title="删除">🗑</button>
       </div>
     </li>`;
   }).join('');
 
   empty.style.display = goals.length === 0 ? 'block' : 'none';
+}
+
+function renderGoalEditForm(g) {
+  return `<li class="task-item">
+    <div style="padding:4px 0;">
+      <div class="form-group" style="margin-bottom:6px;">
+        <input type="text" id="edit-goal-text" value="${escHtml(g.text)}" maxlength="80">
+      </div>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>截止日期（可选）</label>
+          <input type="date" id="edit-goal-deadline" value="${g.deadline || ''}">
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-primary btn-sm" onclick="saveGoalEdit('${g.id}')">保存</button>
+        <button class="btn btn-ghost btn-sm" onclick="cancelGoalEdit()">取消</button>
+      </div>
+    </div>
+  </li>`;
+}
+
+function startGoalEdit(id) { editingGoalId = id; renderAll(); }
+function cancelGoalEdit() { editingGoalId = null; renderAll(); }
+
+function saveGoalEdit(id) {
+  const goal = (DATA.goals || []).find(g => g.id === id);
+  if (!goal) return;
+  goal.text = document.getElementById('edit-goal-text').value.trim() || goal.text;
+  goal.deadline = document.getElementById('edit-goal-deadline').value || null;
+  editingGoalId = null;
+  saveData(DATA);
+  renderAll();
 }
 
 function addGoal() {
@@ -1304,6 +1340,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.activeElement === document.getElementById('taskDeadlineInput')) { e.preventDefault(); addTask(); }
   if (e.key === 'Enter' && document.activeElement === document.getElementById('goalInput')) { e.preventDefault(); addGoal(); }
   if (e.key === 'Escape' && editingTaskId) { e.preventDefault(); cancelEdit(); }
+  if (e.key === 'Escape' && editingGoalId) { e.preventDefault(); cancelGoalEdit(); }
   if (e.key === 'Escape' && document.getElementById('aboutOverlay').classList.contains('show')) { toggleAbout(); }
 });
 
@@ -1388,6 +1425,10 @@ renderAll();
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v2.7.0 <span class="cl-name">目标编辑</span></div>
+            <div class="cl-item">已写下的目标可编辑（内容 + 截止日期）</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v2.6.0 <span class="cl-name">目标时间</span></div>
             <div class="cl-item">目标可填选截止日期（可选）</div>

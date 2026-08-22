@@ -381,9 +381,9 @@
       <button class="btn btn-primary" onclick="addTask()" style="width:100%;justify-content:center;">＋ 添加任务</button>
       <div class="divider"></div>
       <div class="pool-tabs">
+        <button class="pool-tab" id="poolTabGoals" onclick="switchPoolTab('goals')">🎯 目标 <span class="pool-tab-count" id="poolCountGoals">0</span></button>
         <button class="pool-tab active" id="poolTabActive" onclick="switchPoolTab('active')">进行中 <span class="pool-tab-count" id="poolCountActive">0</span></button>
         <button class="pool-tab" id="poolTabDone" onclick="switchPoolTab('done')">已完成 <span class="pool-tab-count" id="poolCountDone">0</span></button>
-        <button class="pool-tab" id="poolTabGoals" onclick="switchPoolTab('goals')">🎯 目标 <span class="pool-tab-count" id="poolCountGoals">0</span></button>
       </div>
       <div class="pool-tab-content active" id="poolTabContentActive">
         <ul class="task-list" id="taskPoolListActive"></ul>

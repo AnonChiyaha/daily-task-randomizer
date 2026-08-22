@@ -158,9 +158,11 @@
   .pool-tab.active .pool-tab-count { background: var(--primary); color: white; }
   .pool-tab-content { display: none; }
   .pool-tab-content.active { display: block; }
-  .goal-input-row { display: flex; gap: 6px; margin-bottom: 10px; }
+  .goal-input-row { display: flex; gap: 6px; margin-bottom: 8px; }
   .goal-input-row #goalInput { flex: 1; }
-  .goal-input-row #goalDeadlineInput { flex-shrink: 0; width: 130px; padding: 6px 8px; }
+  .goal-date-btn.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+  .goal-date-row { display: flex; margin-bottom: 8px; }
+  .goal-date-row input { width: 100%; }
 
   /* Progress bar */
   .progress-wrap { margin-top: 4px; display: flex; align-items: center; gap: 6px; }
@@ -394,10 +396,13 @@
       <div class="pool-tab-content" id="poolTabContentGoals">
         <div class="goal-input-row">
           <input type="text" id="goalInput" placeholder="输入目标内容" maxlength="80">
-          <input type="date" id="goalDeadlineInput" title="截止日期（可选）">
+          <button class="btn btn-ghost btn-sm goal-date-btn" id="goalDateToggle" onclick="toggleGoalDate()" title="设置截止日期">📅</button>
           <button class="btn btn-primary btn-sm" onclick="addGoal()">添加</button>
         </div>
-        <div class="hint-text" style="margin-bottom:8px;">💡 截止日期可选，不填则长期目标。</div>
+        <div class="goal-date-row" id="goalDateRow" style="display:none;">
+          <input type="date" id="goalDeadlineInput" title="截止日期">
+        </div>
+        <div class="hint-text" style="margin-bottom:8px;">💡 截止日期可选，点 📅 设置。</div>
         <ul class="task-list" id="goalList"></ul>
         <div class="empty" id="goalEmpty"><div class="emoji">🎯</div><p>写下这个阶段的大目标吧</p></div>
       </div>
@@ -475,6 +480,7 @@ let subdividableOn = false;
 let currentPriority = 'normal';
 let editingTaskId = null;
 let poolTab = 'active';
+let goalDateOn = false;
 
 // ============================================================
 // HELPERS
@@ -956,8 +962,16 @@ function addGoal() {
   saveData(DATA);
   input.value = '';
   deadlineInput.value = '';
+  if (goalDateOn) toggleGoalDate(); // reset date toggle
   input.focus();
   renderAll();
+}
+
+function toggleGoalDate() {
+  goalDateOn = !goalDateOn;
+  document.getElementById('goalDateRow').style.display = goalDateOn ? 'flex' : 'none';
+  document.getElementById('goalDateToggle').classList.toggle('active', goalDateOn);
+  if (goalDateOn) document.getElementById('goalDeadlineInput').focus();
 }
 
 function deleteGoal(id) {

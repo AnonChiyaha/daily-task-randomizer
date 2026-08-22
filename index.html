@@ -158,6 +158,8 @@
   .pool-tab.active .pool-tab-count { background: var(--primary); color: white; }
   .pool-tab-content { display: none; }
   .pool-tab-content.active { display: block; }
+  .goal-input-row { display: flex; gap: 6px; margin-bottom: 10px; }
+  .goal-input-row input { flex: 1; }
 
   /* Progress bar */
   .progress-wrap { margin-top: 4px; display: flex; align-items: center; gap: 6px; }
@@ -378,6 +380,7 @@
       <div class="pool-tabs">
         <button class="pool-tab active" id="poolTabActive" onclick="switchPoolTab('active')">进行中 <span class="pool-tab-count" id="poolCountActive">0</span></button>
         <button class="pool-tab" id="poolTabDone" onclick="switchPoolTab('done')">已完成 <span class="pool-tab-count" id="poolCountDone">0</span></button>
+        <button class="pool-tab" id="poolTabGoals" onclick="switchPoolTab('goals')">🎯 目标 <span class="pool-tab-count" id="poolCountGoals">0</span></button>
       </div>
       <div class="pool-tab-content active" id="poolTabContentActive">
         <ul class="task-list" id="taskPoolListActive"></ul>
@@ -386,6 +389,14 @@
       <div class="pool-tab-content" id="poolTabContentDone">
         <ul class="task-list" id="taskPoolListDone"></ul>
         <div class="empty" id="poolEmptyDone"><div class="emoji">🎉</div><p>暂无已完成的任务</p></div>
+      </div>
+      <div class="pool-tab-content" id="poolTabContentGoals">
+        <div class="goal-input-row">
+          <input type="text" id="goalInput" placeholder="例如：备考六级" maxlength="80">
+          <button class="btn btn-primary btn-sm" onclick="addGoal()">添加</button>
+        </div>
+        <ul class="task-list" id="goalList"></ul>
+        <div class="empty" id="goalEmpty"><div class="emoji">🎯</div><p>写下这个阶段的大目标吧</p></div>
       </div>
     </div>
   </section>
@@ -444,8 +455,15 @@
 const STORAGE_KEY = 'daily-task-randomizer-v3';
 
 function loadData() {
-  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch (e) {}
-  return { tasks: [], daily: {}, settings: { dailyCount: 3 } };
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (!d.goals) d.goals = []; // migrate older data
+      return d;
+    }
+  } catch (e) {}
+  return { tasks: [], goals: [], daily: {}, settings: { dailyCount: 3 } };
 }
 function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 let DATA = loadData();
@@ -841,6 +859,7 @@ function getDayStatus(dateStr) {
 // ============================================================
 function renderAll() {
   renderTaskPool();
+  renderGoals();
   renderToday();
   renderCalendar();
   renderHeader();
@@ -883,8 +902,58 @@ function switchPoolTab(tab) {
   poolTab = tab;
   document.getElementById('poolTabActive').classList.toggle('active', tab === 'active');
   document.getElementById('poolTabDone').classList.toggle('active', tab === 'done');
+  document.getElementById('poolTabGoals').classList.toggle('active', tab === 'goals');
   document.getElementById('poolTabContentActive').classList.toggle('active', tab === 'active');
   document.getElementById('poolTabContentDone').classList.toggle('active', tab === 'done');
+  document.getElementById('poolTabContentGoals').classList.toggle('active', tab === 'goals');
+}
+
+// ============================================================
+// STAGE GOALS
+// ============================================================
+function renderGoals() {
+  const goals = DATA.goals || [];
+  document.getElementById('poolCountGoals').textContent = goals.length;
+
+  const list = document.getElementById('goalList');
+  const empty = document.getElementById('goalEmpty');
+
+  list.innerHTML = goals.map(g => {
+    return `<li class="task-item ${g.done ? 'done' : ''}">
+      <div class="task-item-row">
+        <div class="task-checkbox ${g.done ? 'checked' : ''}" onclick="toggleGoal('${g.id}')"></div>
+        <div class="task-info">
+          <div class="task-name">${escHtml(g.text)}</div>
+        </div>
+        <button class="task-delete" onclick="deleteGoal('${g.id}')" title="删除">🗑</button>
+      </div>
+    </li>`;
+  }).join('');
+
+  empty.style.display = goals.length === 0 ? 'block' : 'none';
+}
+
+function addGoal() {
+  const input = document.getElementById('goalInput');
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+  DATA.goals = DATA.goals || [];
+  DATA.goals.push({ id: genId(), text, done: false });
+  saveData(DATA);
+  input.value = '';
+  input.focus();
+  renderAll();
+}
+
+function deleteGoal(id) {
+  DATA.goals = (DATA.goals || []).filter(g => g.id !== id);
+  saveData(DATA);
+  renderAll();
+}
+
+function toggleGoal(id) {
+  const goal = (DATA.goals || []).find(g => g.id === id);
+  if (goal) { goal.done = !goal.done; saveData(DATA); renderAll(); }
 }
 
 function taskItemHtml(t, fullyDone, td) {
@@ -1204,6 +1273,7 @@ function switchAboutTab(tab) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.activeElement === document.getElementById('taskNameInput')) { e.preventDefault(); addTask(); }
   if (e.key === 'Enter' && document.activeElement === document.getElementById('taskDeadlineInput')) { e.preventDefault(); addTask(); }
+  if (e.key === 'Enter' && document.activeElement === document.getElementById('goalInput')) { e.preventDefault(); addGoal(); }
   if (e.key === 'Escape' && editingTaskId) { e.preventDefault(); cancelEdit(); }
   if (e.key === 'Escape' && document.getElementById('aboutOverlay').classList.contains('show')) { toggleAbout(); }
 });
@@ -1289,6 +1359,10 @@ renderAll();
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v2.5.0 <span class="cl-name">阶段性目标</span></div>
+            <div class="cl-item">新增「目标」标签页，可记录阶段大目标</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v2.4.0 <span class="cl-name">任务池标签页</span></div>
             <div class="cl-item">进行中 / 已完成改为两个标签页</div>

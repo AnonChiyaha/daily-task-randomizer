@@ -28,6 +28,7 @@
     --shadow: 0 1px 2px rgba(16,24,40,0.05), 0 2px 8px rgba(16,24,40,0.04);
     --shadow-hover: 0 2px 4px rgba(16,24,40,0.06), 0 12px 24px rgba(16,24,40,0.10);
     --font: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Consolas', 'JetBrains Mono', 'Courier New', monospace;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -51,8 +52,9 @@
     position: sticky; top: 0; z-index: 100;
   }
   .header-title { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; position: relative; cursor: default; }
+  .header-title span { letter-spacing: 0.06em; }
   .header-title .icon { font-size: 1.5rem; }
-  .header-gif { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  .header-gif { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 0 0 2px var(--primary-light); }
   .header-title:hover::after {
     content: attr(data-tooltip);
     position: absolute; top: calc(100% + 8px); left: 0;
@@ -63,8 +65,8 @@
     animation: tooltipIn 0.15s ease;
   }
   @keyframes tooltipIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-  .today-label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
-  .badge { background: var(--primary-gradient-soft); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+  .today-label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .badge { background: var(--primary-gradient-soft); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
   .main {
     display: grid;
@@ -196,9 +198,22 @@
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; transition: all 0.15s; background: white;
   }
-  .task-checkbox.checked { background: var(--success); border-color: var(--success); }
+  .task-checkbox.checked { background: var(--success); border-color: var(--success); animation: pop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
   .task-checkbox.checked::after { content: '✓'; color: white; font-size: 0.7rem; font-weight: 700; }
   .task-checkbox:hover { border-color: var(--primary); }
+
+  /* 动效 */
+  @keyframes pop { 0% { transform: scale(0.7); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+  #generateBtn.rolling { animation: diceShake 0.28s ease-in-out infinite; }
+  @keyframes diceShake {
+    0%, 100% { transform: rotate(0) scale(1); }
+    25% { transform: rotate(-14deg) scale(1.12); }
+    75% { transform: rotate(14deg) scale(1.12); }
+  }
+  .main > .panel { animation: panelIn 0.45s ease both; }
+  .main > .panel:nth-child(2) { animation-delay: 0.07s; }
+  .main > .panel:nth-child(3) { animation-delay: 0.14s; }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   /* Calendar */
   .calendar-nav { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
@@ -244,8 +259,18 @@
 
   .stats-row { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
   .stat-card { flex: 1; min-width: 80px; background: var(--bg); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
-  .stat-number { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+  .stat-number { font-size: 1.5rem; font-weight: 800; color: var(--primary); font-family: var(--mono); font-variant-numeric: tabular-nums; }
   .stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* 今日完成度进度环 */
+  .ring-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 12px; }
+  .ring-wrap { position: relative; width: 66px; height: 66px; }
+  .ring-svg { width: 66px; height: 66px; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+  .ring-fg { fill: none; stroke: var(--primary); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1), stroke 0.4s; }
+  .ring-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .ring-num { font-size: 0.95rem; font-weight: 800; color: var(--primary); font-family: var(--mono); }
+  .ring-text { font-size: 0.8rem; color: var(--text-secondary); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
   .divider { height: 1px; background: var(--border); margin: 12px 0; }
   .settings-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.8rem; color: var(--text-secondary); }
@@ -463,6 +488,16 @@
       </div>
     </div>
     <div class="panel-body">
+      <div class="ring-row" id="todayRingRow" style="display:none;">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 66 66">
+            <circle class="ring-bg" cx="33" cy="33" r="28"/>
+            <circle class="ring-fg" cx="33" cy="33" r="28" id="ringFg"/>
+          </svg>
+          <div class="ring-center"><span class="ring-num" id="ringNum">0%</span></div>
+        </div>
+        <span class="ring-text" id="ringText"></span>
+      </div>
       <div class="settings-row">
         <span>每日任务数：</span>
         <input type="number" id="dailyCount" value="3" min="1" max="10" onchange="saveSettings()">
@@ -977,6 +1012,25 @@ function generateToday() {
   const td = todayStr();
   if (DATA.daily[td] && DATA.daily[td].assigned && DATA.daily[td].assigned.length > 0) {
     if (!confirm('今天已经分配过任务了，要重新随机分配吗？（之前的完成记录会保留）')) return;
+  }
+  const btn = document.getElementById('generateBtn');
+  if (!btn || btn.classList.contains('rolling')) return;
+  btn.classList.add('rolling');
+  btn.disabled = true;
+  const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+  let i = 0;
+  const timer = setInterval(() => { btn.textContent = faces[i++ % 6]; }, 85);
+  setTimeout(() => {
+    clearInterval(timer);
+    btn.classList.remove('rolling');
+    btn.disabled = false;
+    doGenerateToday();
+  }, 900);
+}
+
+function doGenerateToday() {
+  const td = todayStr();
+  if (DATA.daily[td] && DATA.daily[td].assigned && DATA.daily[td].assigned.length > 0) {
     const oldDone = DATA.daily[td].done || [];
     const ids = generateDailyTasks();
     const assigned = ids.map(id => {
@@ -1308,6 +1362,7 @@ function renderToday() {
   const stats = document.getElementById('todayStats');
   const statsRow = document.getElementById('todayStatsRow');
   const genBtn = document.getElementById('generateBtn');
+  const ringRow = document.getElementById('todayRingRow');
   const dayData = DATA.daily[td];
   const avail = getAvailableTasks().length;
 
@@ -1315,6 +1370,7 @@ function renderToday() {
     list.innerHTML = '';
     empty.style.display = 'block';
     statsRow.style.display = 'none';
+    ringRow.style.display = 'none';
     stats.textContent = avail > 0 ? `${avail} 个任务待分配` : '全部完成！';
     genBtn.textContent = '🎲 随机分配';
     genBtn.disabled = avail === 0;
@@ -1323,6 +1379,7 @@ function renderToday() {
 
   empty.style.display = 'none';
   statsRow.style.display = 'flex';
+  ringRow.style.display = 'flex';
   genBtn.textContent = '🔄 重新分配';
   genBtn.disabled = false;
 
@@ -1346,6 +1403,7 @@ function renderToday() {
   document.getElementById('statAssigned').textContent = total;
   document.getElementById('statDone').textContent = doneCount;
   document.getElementById('statRemaining').textContent = avail;
+  updateRing(doneCount, total);
 
   list.innerHTML = dayData.assigned.map(entry => {
     const id = typeof entry === 'string' ? entry : entry.id;
@@ -1387,6 +1445,21 @@ function renderToday() {
       </div>
     </li>`;
   }).join('');
+}
+
+function updateRing(done, total) {
+  const fg = document.getElementById('ringFg');
+  const num = document.getElementById('ringNum');
+  const txt = document.getElementById('ringText');
+  if (!fg || !num) return;
+  const C = 2 * Math.PI * 28;
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  fg.style.strokeDasharray = C;
+  fg.style.strokeDashoffset = C * (1 - pct / 100);
+  fg.style.stroke = pct === 100 ? 'var(--success)' : 'var(--primary)';
+  num.textContent = pct + '%';
+  num.style.color = pct === 100 ? 'var(--success)' : 'var(--primary)';
+  if (txt) txt.textContent = done + ' / ' + total;
 }
 
 function renderCalendar() {
@@ -1717,6 +1790,10 @@ sb.auth.onAuthStateChange((event, session) => {
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v3.2.0 <span class="cl-name">动效升级</span></div>
+            <div class="cl-item">随机分配骰子动画、完成度进度环、等宽数字字体</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v3.1.1 <span class="cl-name">细节优化</span></div>
             <div class="cl-item">日期输入框不再显示默认的 yyyy/mm/dd 占位</div>

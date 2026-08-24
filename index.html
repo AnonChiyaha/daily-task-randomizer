@@ -6,11 +6,13 @@
 <title>THE_LONG_MARCH_1「"長征"一號機」</title>
 <style>
   :root {
-    --bg: #fafafe;
+    --bg: #f6f5fb;
     --card: #ffffff;
     --primary: #7c3aed;
     --primary-light: #ede9fe;
     --primary-hover: #6d28d9;
+    --primary-gradient: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    --primary-gradient-soft: linear-gradient(135deg, #ede9fe, #ddd6fe);
     --text: #1e1b4b;
     --text-secondary: #6b7280;
     --text-muted: #9ca3af;
@@ -23,7 +25,8 @@
     --border: #e5e7eb;
     --radius: 12px;
     --radius-sm: 8px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 1px 2px rgba(16,24,40,0.05), 0 2px 8px rgba(16,24,40,0.04);
+    --shadow-hover: 0 2px 4px rgba(16,24,40,0.06), 0 12px 24px rgba(16,24,40,0.10);
     --font: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +64,7 @@
   }
   @keyframes tooltipIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
   .today-label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
-  .badge { background: var(--primary-light); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+  .badge { background: var(--primary-gradient-soft); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
 
   .main {
     display: grid;
@@ -75,7 +78,8 @@
   @media (max-width: 1150px) { .main { grid-template-columns: 1fr 320px; } .panel-tasks { grid-column: 1 / -1; } }
   @media (max-width: 768px) { .main { grid-template-columns: 1fr; padding: 12px; gap: 12px; } .header { padding: 12px 16px; } }
 
-  .panel { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+  .panel { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+  .panel:hover { box-shadow: var(--shadow-hover); border-color: #ddd6fe; }
   .panel-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .panel-header h2 { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
   .panel-body { padding: 14px 18px; }
@@ -86,8 +90,8 @@
     font-size: 0.85rem; font-weight: 600; cursor: pointer;
     border: none; transition: all 0.15s ease; font-family: var(--font); white-space: nowrap;
   }
-  .btn-primary { background: var(--primary); color: white; }
-  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+  .btn-primary { background: var(--primary-gradient); color: white; box-shadow: 0 1px 3px rgba(124,58,237,0.25); }
+  .btn-primary:hover { background: linear-gradient(135deg, #7c3aed, #6d28d9); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(124,58,237,0.35); }
   .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
   .btn-ghost:hover { background: var(--bg); color: var(--text); }
   .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
@@ -208,7 +212,7 @@
     min-height: 38px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   }
   .day-cell:hover { background: var(--primary-light); }
-  .day-cell.today { background: var(--primary-light); color: var(--primary); font-weight: 700; border-radius: 8px; outline: 2px solid var(--primary); outline-offset: -2px; }
+  .day-cell.today { background: var(--primary-gradient); color: white; font-weight: 700; border-radius: 8px; box-shadow: 0 2px 8px rgba(124,58,237,0.35); }
   .day-cell.other-month { color: var(--text-muted); opacity: 0.4; }
   .day-cell.has-tasks::after {
     content: ''; width: 6px; height: 6px; border-radius: 50%;
@@ -217,6 +221,9 @@
   .day-cell.dot-all::after { background: var(--success); }
   .day-cell.dot-partial::after { background: var(--warning); }
   .day-cell.dot-none::after { background: var(--danger); }
+  .day-cell.today.dot-all::after,
+  .day-cell.today.dot-partial::after,
+  .day-cell.today.dot-none::after { box-shadow: 0 0 0 1.5px rgba(255,255,255,0.95); }
 
   .day-detail { margin-top: 12px; padding: 12px; background: var(--bg); border-radius: var(--radius-sm); display: none; }
   .day-detail.active { display: block; }
@@ -1692,6 +1699,10 @@ sb.auth.onAuthStateChange((event, session) => {
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v3.1.0 <span class="cl-name">界面美化</span></div>
+            <div class="cl-item">配色质感升级：渐变按钮、分层阴影、暖紫背景</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v3.0.0 <span class="cl-name">跨设备同步</span></div>
             <div class="cl-item">接入 Supabase，注册登录后数据云端同步</div>

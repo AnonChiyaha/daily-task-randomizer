@@ -313,6 +313,23 @@
   }
   .about-counter .counter-sep { color: var(--border); }
 
+  /* Auth modal */
+  .auth-icon { font-size: 2.6rem; text-align: center; margin-bottom: 6px; }
+  .auth-title { text-align: center; font-weight: 700; font-size: 1.15rem; margin-bottom: 4px; }
+  .auth-sub { text-align: center; color: var(--text-muted); font-size: 0.83rem; margin-bottom: 18px; }
+  .auth-field { margin-bottom: 14px; }
+  .auth-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+  .auth-input {
+    width: 100%; padding: 13px 15px; font-size: 1rem;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--bg); color: var(--text); font-family: var(--font);
+    transition: border 0.15s, box-shadow 0.15s;
+  }
+  .auth-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  .auth-msg { color: var(--danger); font-size: 0.8rem; margin: -4px 0 12px; min-height: 1.2em; text-align: center; }
+  .auth-btn { width: 100%; padding: 12px; font-size: 0.95rem; justify-content: center; }
+  .auth-btn-secondary { width: 100%; padding: 11px; font-size: 0.9rem; justify-content: center; margin-top: 8px; }
+
   /* About tabs */
   .about-tabs { display: flex; gap: 6px; }
   .about-tab {
@@ -587,25 +604,27 @@ function renderAuthModal() {
   const body = document.getElementById('authBody');
   if (currentUser) {
     body.innerHTML = `
-      <p style="text-align:center;margin-bottom:6px;">已登录：<b>${escHtml(currentUser.email || '')}</b></p>
-      <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-bottom:14px;">数据自动同步到云端，其它设备登录同一账号即可同步。</p>
-      <button class="btn btn-primary" onclick="doLogout()" style="width:100%;justify-content:center;">退出登录</button>`;
+      <div class="auth-icon">☁️</div>
+      <div class="auth-title">已登录</div>
+      <div class="auth-sub">${escHtml(currentUser.email || '')}</div>
+      <p class="auth-sub" style="margin-bottom:20px;">数据自动同步到云端，其它设备登录同一账号即可同步。</p>
+      <button class="btn btn-primary auth-btn" onclick="doLogout()">退出登录</button>`;
   } else {
     body.innerHTML = `
-      <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-bottom:12px;">不注册也能用（数据存本机）；注册登录后跨设备自动同步。</p>
-      <div class="form-group">
-        <label>邮箱</label>
-        <input type="email" id="authEmail" placeholder="you@example.com">
+      <div class="auth-icon">🔐</div>
+      <div class="auth-title">登录 / 注册</div>
+      <p class="auth-sub">本网站支持本地数据储存，注册登录后可跨设备自动同步数据。</p>
+      <div class="auth-field">
+        <label class="auth-label">邮箱</label>
+        <input type="email" id="authEmail" class="auth-input" placeholder="you@example.com" autocomplete="email">
       </div>
-      <div class="form-group">
-        <label>密码</label>
-        <input type="password" id="authPassword" placeholder="至少 6 位">
+      <div class="auth-field">
+        <label class="auth-label">密码</label>
+        <input type="password" id="authPassword" class="auth-input" placeholder="至少 6 位" autocomplete="current-password">
       </div>
-      <div id="authMsg" style="color:var(--danger);font-size:0.78rem;margin-bottom:8px;min-height:1em;"></div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-primary" onclick="doLogin()" style="flex:1;justify-content:center;">登录</button>
-        <button class="btn btn-ghost" onclick="doSignup()" style="flex:1;justify-content:center;">注册</button>
-      </div>`;
+      <div class="auth-msg" id="authMsg"></div>
+      <button class="btn btn-primary auth-btn" onclick="doLogin()">登录</button>
+      <button class="btn btn-ghost auth-btn-secondary" onclick="doSignup()">注册新账号</button>`;
   }
 }
 let DATA = loadData();
@@ -1620,7 +1639,7 @@ sb.auth.onAuthStateChange((event, session) => {
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
           <div class="cl-entry">
-            <div class="cl-version">v2.9.0 <span class="cl-name">跨设备同步</span></div>
+            <div class="cl-version">v3.0.0 <span class="cl-name">跨设备同步</span></div>
             <div class="cl-item">接入 Supabase，注册登录后数据云端同步</div>
           </div>
           <div class="cl-entry">

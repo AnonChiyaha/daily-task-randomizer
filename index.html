@@ -324,14 +324,15 @@
   }
   .trend-tab.active { background: white; color: var(--primary); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
   .trend-chart { display: flex; align-items: flex-end; gap: 4px; height: 92px; }
+  .trend-chart.dense { gap: 1px; }
   .trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; min-width: 0; }
   .trend-bar-zone { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
-  .trend-bar { width: 62%; border-radius: 3px 3px 0 0; transition: height 0.4s ease; min-height: 3px; }
+  .trend-bar { width: 68%; border-radius: 3px 3px 0 0; transition: height 0.4s ease; min-height: 3px; }
   .trend-bar.full { background: var(--success); }
   .trend-bar.partial { background: var(--warning); }
   .trend-bar.zero { background: var(--danger); }
   .trend-bar.none { background: var(--border); }
-  .trend-day { font-size: 0.58rem; color: var(--text-muted); font-family: var(--mono); margin-top: 5px; white-space: nowrap; }
+  .trend-day { font-size: 0.58rem; color: var(--text-muted); font-family: var(--mono); margin-top: 5px; white-space: nowrap; height: 12px; line-height: 12px; overflow: hidden; }
 
   /* Priority selector */
   .priority-row { display: flex; gap: 6px; }
@@ -1630,6 +1631,7 @@ function renderCalendar() {
 function renderTrend() {
   const chart = document.getElementById('trendChart');
   if (!chart) return;
+  chart.classList.toggle('dense', trendRange >= 30);
   const today = new Date();
   const cols = [];
   for (let i = trendRange - 1; i >= 0; i--) {
@@ -1952,6 +1954,10 @@ sb.auth.onAuthStateChange((event, session) => {
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v3.4.1 <span class="cl-name">修复</span></div>
+            <div class="cl-item">修复近 30 天趋势图柱子底部不对齐、间距过挤的问题</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v3.4.0 <span class="cl-name">完成趋势</span></div>
             <div class="cl-item">日历下方新增完成趋势柱状图，可切换近 7/14/30 天</div>

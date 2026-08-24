@@ -312,6 +312,27 @@
 
   .legend-row { display: flex; gap: 12px; justify-content: center; margin-top: 12px; font-size: 0.7rem; color: var(--text-muted); flex-wrap: wrap; }
 
+  /* 完成趋势图 */
+  .trend-wrap { margin-top: 14px; border-top: 1px dashed var(--border); padding-top: 12px; }
+  .trend-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .trend-title { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
+  .trend-tabs { display: flex; gap: 3px; background: var(--bg); border-radius: 6px; padding: 2px; }
+  .trend-tab {
+    border: none; background: transparent; padding: 3px 8px; border-radius: 5px;
+    font-size: 0.68rem; font-weight: 500; color: var(--text-muted); cursor: pointer;
+    font-family: var(--font); transition: all 0.15s;
+  }
+  .trend-tab.active { background: white; color: var(--primary); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .trend-chart { display: flex; align-items: flex-end; gap: 4px; height: 92px; }
+  .trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; min-width: 0; }
+  .trend-bar-zone { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+  .trend-bar { width: 62%; border-radius: 3px 3px 0 0; transition: height 0.4s ease; min-height: 3px; }
+  .trend-bar.full { background: var(--success); }
+  .trend-bar.partial { background: var(--warning); }
+  .trend-bar.zero { background: var(--danger); }
+  .trend-bar.none { background: var(--border); }
+  .trend-day { font-size: 0.58rem; color: var(--text-muted); font-family: var(--mono); margin-top: 5px; white-space: nowrap; }
+
   /* Priority selector */
   .priority-row { display: flex; gap: 6px; }
   .priority-btn {
@@ -564,6 +585,17 @@
         <span>🟡 部分完成</span>
         <span>🔴 未完成</span>
       </div>
+      <div class="trend-wrap">
+        <div class="trend-header">
+          <span class="trend-title">📈 完成趋势</span>
+          <div class="trend-tabs">
+            <button class="trend-tab active" data-range="7" onclick="setTrendRange(7)">近7天</button>
+            <button class="trend-tab" data-range="14" onclick="setTrendRange(14)">近14天</button>
+            <button class="trend-tab" data-range="30" onclick="setTrendRange(30)">近30天</button>
+          </div>
+        </div>
+        <div class="trend-chart" id="trendChart"></div>
+      </div>
     </div>
   </section>
 
@@ -762,6 +794,7 @@ let poolTab = 'active';
 let goalDateOn = false;
 let editingGoalId = null;
 let dragType = null, dragId = null, dragAfter = false, dragEl = null;
+let trendRange = 7;
 
 // ============================================================
 // HELPERS
@@ -1172,6 +1205,7 @@ function renderAll() {
   renderToday();
   renderCalendar();
   renderHeader();
+  renderTrend();
   refreshDateInputs();
 }
 
@@ -1593,6 +1627,44 @@ function renderCalendar() {
   renderDayDetail();
 }
 
+function renderTrend() {
+  const chart = document.getElementById('trendChart');
+  if (!chart) return;
+  const today = new Date();
+  const cols = [];
+  for (let i = trendRange - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    cols.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+  }
+  chart.innerHTML = cols.map(ds => {
+    const day = DATA.daily[ds];
+    const [, m, dd] = ds.split('-');
+    const dNum = Number(dd);
+    let pct = -1, doneCount = 0, total = 0;
+    if (day && day.assigned && day.assigned.length > 0) {
+      total = day.assigned.length;
+      doneCount = (day.done || []).length;
+      pct = Math.round(doneCount / total * 100);
+    }
+    const cls = pct < 0 ? 'none' : (pct >= 100 ? 'full' : (pct > 0 ? 'partial' : 'zero'));
+    const height = pct < 0 ? 5 : Math.max(10, pct);
+    const showLabel = trendRange <= 14 || dNum % 5 === 0;
+    const label = showLabel ? `${Number(m)}/${dNum}` : '';
+    const tip = pct < 0 ? `${ds} 无记录` : `${ds} ${doneCount}/${total} 完成`;
+    return `<div class="trend-col" title="${tip}">
+      <div class="trend-bar-zone"><div class="trend-bar ${cls}" style="height:${height}%"></div></div>
+      <div class="trend-day">${label}</div>
+    </div>`;
+  }).join('');
+}
+
+function setTrendRange(n) {
+  trendRange = n;
+  document.querySelectorAll('.trend-tab').forEach(t => t.classList.toggle('active', Number(t.dataset.range) === n));
+  renderTrend();
+}
+
 function renderDayDetail() {
   const detail = document.getElementById('dayDetail');
   if (!selectedDay) { detail.classList.remove('active'); return; }
@@ -1880,6 +1952,10 @@ sb.auth.onAuthStateChange((event, session) => {
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v3.4.0 <span class="cl-name">完成趋势</span></div>
+            <div class="cl-item">日历下方新增完成趋势柱状图，可切换近 7/14/30 天</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v3.3.0 <span class="cl-name">移动端适配</span></div>
             <div class="cl-item">手机触控优化、拖动排序预览、移动端上下移排序</div>

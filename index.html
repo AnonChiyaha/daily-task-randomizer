@@ -112,6 +112,10 @@
     transition: border 0.15s; background: var(--bg); color: var(--text);
   }
   input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  /* 隐藏 date 输入框空值时的默认占位（yyyy/mm/dd / 年/月/日） */
+  input[type="date"]::-webkit-datetime-edit { color: transparent; }
+  input[type="date"]:focus::-webkit-datetime-edit,
+  input[type="date"].filled::-webkit-datetime-edit { color: var(--text); }
 
   /* Subdivision toggle */
   .toggle-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; cursor: pointer; font-size: 0.8rem; color: var(--text-secondary); user-select: none; }
@@ -1080,6 +1084,7 @@ function renderAll() {
   renderToday();
   renderCalendar();
   renderHeader();
+  refreshDateInputs();
 }
 
 function renderHeader() {
@@ -1589,6 +1594,19 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// 维护 date 输入的 .filled 类（隐藏空值时的默认占位）
+function refreshDateInputs() {
+  document.querySelectorAll('input[type="date"]').forEach(el => {
+    el.classList.toggle('filled', !!el.value);
+  });
+}
+document.addEventListener('input', e => {
+  if (e.target && e.target.type === 'date') e.target.classList.toggle('filled', !!e.target.value);
+});
+document.addEventListener('change', e => {
+  if (e.target && e.target.type === 'date') e.target.classList.toggle('filled', !!e.target.value);
+});
+
 // ============================================================
 // INIT
 // ============================================================
@@ -1699,6 +1717,10 @@ sb.auth.onAuthStateChange((event, session) => {
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v3.1.1 <span class="cl-name">细节优化</span></div>
+            <div class="cl-item">日期输入框不再显示默认的 yyyy/mm/dd 占位</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v3.1.0 <span class="cl-name">界面美化</span></div>
             <div class="cl-item">配色质感升级：渐变按钮、分层阴影、暖紫背景</div>

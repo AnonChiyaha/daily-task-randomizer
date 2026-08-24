@@ -1639,7 +1639,7 @@ function renderTrend() {
     d.setDate(d.getDate() - i);
     cols.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
   }
-  chart.innerHTML = cols.map(ds => {
+  chart.innerHTML = cols.map((ds, index) => {
     const day = DATA.daily[ds];
     const [, m, dd] = ds.split('-');
     const dNum = Number(dd);
@@ -1651,8 +1651,8 @@ function renderTrend() {
     }
     const cls = pct < 0 ? 'none' : (pct >= 100 ? 'full' : (pct > 0 ? 'partial' : 'zero'));
     const height = pct < 0 ? 5 : Math.max(10, pct);
-    const showLabel = trendRange <= 14 || dNum % 5 === 0;
-    const label = showLabel ? `${Number(m)}/${dNum}` : '';
+    const step = trendRange <= 7 ? 1 : (trendRange <= 14 ? 2 : 5);
+    const label = index % step === 0 ? `${Number(m)}/${dNum}` : '';
     const tip = pct < 0 ? `${ds} 无记录` : `${ds} ${doneCount}/${total} 完成`;
     return `<div class="trend-col" title="${tip}">
       <div class="trend-bar-zone"><div class="trend-bar ${cls}" style="height:${height}%"></div></div>
@@ -1954,6 +1954,10 @@ sb.auth.onAuthStateChange((event, session) => {
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v3.4.2 <span class="cl-name">修复</span></div>
+            <div class="cl-item">近 14 天趋势图日期标签改为隔天显示，不再拥挤</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v3.4.1 <span class="cl-name">修复</span></div>
             <div class="cl-item">修复近 30 天趋势图柱子底部不对齐、间距过挤的问题</div>

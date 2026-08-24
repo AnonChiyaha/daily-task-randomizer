@@ -78,7 +78,31 @@
     min-height: calc(100vh - 70px);
   }
   @media (max-width: 1150px) { .main { grid-template-columns: 1fr 320px; } .panel-tasks { grid-column: 1 / -1; } }
-  @media (max-width: 768px) { .main { grid-template-columns: 1fr; padding: 12px; gap: 12px; } .header { padding: 12px 16px; } }
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; padding: 12px; gap: 12px; }
+    .header { padding: 12px 16px; }
+    .header-title { font-size: 1.02rem; gap: 7px; }
+    .header-title span { letter-spacing: 0.01em; }
+    .header-gif { width: 32px; height: 32px; }
+    .today-label { display: none; }
+    .badge { font-size: 0.72rem; padding: 3px 10px; }
+    /* 触控目标 */
+    .task-checkbox { width: 24px; height: 24px; }
+    .task-checkbox.checked::after { font-size: 0.82rem; }
+    .btn { padding: 10px 14px; }
+    .btn-sm { padding: 7px 12px; }
+    /* 日历格子 */
+    .day-cell { min-height: 44px; font-size: 0.92rem; padding: 8px 2px; }
+    .day-cell.has-tasks::after { width: 7px; height: 7px; bottom: 4px; }
+    .calendar-grid { gap: 3px; }
+    /* 弹窗铺满 */
+    .about-modal { max-width: none; max-height: 85vh; border-radius: 14px; }
+    .about-head { padding: 14px 16px; }
+    .about-body { padding: 16px; }
+    /* 拖动排序 → 上下移按钮 */
+    .drag-handle { display: none; }
+    .mobile-move { display: flex; }
+  }
 
   .panel { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; transition: box-shadow 0.25s ease, border-color 0.25s ease; }
   .panel:hover { box-shadow: var(--shadow-hover); border-color: #ddd6fe; }
@@ -180,6 +204,16 @@
   }
   .drag-handle:hover { color: var(--primary); background: var(--bg); }
   .drag-handle:active { cursor: grabbing; }
+  .task-item.dragging { opacity: 0.45; }
+  .task-item.drag-over-top { box-shadow: 0 -2.5px 0 0 var(--primary); }
+  .task-item.drag-over-bottom { box-shadow: 0 2.5px 0 0 var(--primary); }
+  .mobile-move { display: none; flex-direction: column; gap: 2px; margin-right: 6px; flex-shrink: 0; }
+  .move-btn {
+    width: 24px; height: 24px; padding: 0; border: 1px solid var(--border); border-radius: 5px;
+    background: white; color: var(--text-secondary); font-size: 0.6rem; line-height: 1;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .move-btn:active { background: var(--primary-light); color: var(--primary); }
 
   /* Progress bar */
   .progress-wrap { margin-top: 4px; display: flex; align-items: center; gap: 6px; }
@@ -727,7 +761,7 @@ let editingTaskId = null;
 let poolTab = 'active';
 let goalDateOn = false;
 let editingGoalId = null;
-let dragType = null, dragId = null;
+let dragType = null, dragId = null, dragAfter = false, dragEl = null;
 
 // ============================================================
 // HELPERS
@@ -1205,9 +1239,10 @@ function renderGoals() {
       else if (daysLeft <= 7) deadlineHtml = `<span class="soon">🟡 剩余 ${daysLeft} 天</span>`;
       else deadlineHtml = `📅 截止 ${fmtDate(g.deadline)}（${daysLeft} 天）`;
     }
-    return `<li class="task-item ${g.done ? 'done' : ''}" ondragover="event.preventDefault()" ondrop="dropOn('goal','${g.id}')">
+    return `<li class="task-item ${g.done ? 'done' : ''}" ondragover="dragOver(event,'goal','${g.id}')" ondragleave="dragLeave(event)" ondrop="dropOn(event,'goal','${g.id}')">
       <div class="task-item-row">
-        <span class="drag-handle" draggable="true" ondragstart="dragStart('goal','${g.id}')" title="拖动排序">⠿</span>
+        <span class="drag-handle" draggable="true" ondragstart="dragStart(event,'goal','${g.id}')" ondragend="dragEnd(event)" title="拖动排序">⠿</span>
+        <span class="mobile-move"><button class="move-btn" onclick="moveGoal('${g.id}',-1)" title="上移">▲</button><button class="move-btn" onclick="moveGoal('${g.id}',1)" title="下移">▼</button></span>
         <div class="task-checkbox ${g.done ? 'checked' : ''}" onclick="toggleGoal('${g.id}')"></div>
         <div class="task-info">
           <div class="task-name">${escHtml(g.text)}</div>
@@ -1291,24 +1326,77 @@ function toggleGoal(id) {
 // ============================================================
 // DRAG REORDER
 // ============================================================
-function dragStart(type, id) {
+function dragStart(e, type, id) {
   dragType = type;
   dragId = id;
+  dragAfter = false;
+  dragEl = e.currentTarget.closest('.task-item');
+  if (dragEl) dragEl.classList.add('dragging');
+  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
 }
 
-function dropOn(type, targetId) {
-  if (dragType !== type || !dragId || dragId === targetId) { dragType = null; dragId = null; return; }
+function dragOver(e, type, id) {
+  e.preventDefault();
+  if (dragType !== type || !dragId || dragId === id) return;
+  const el = e.currentTarget;
+  const rect = el.getBoundingClientRect();
+  const after = (e.clientY - rect.top) > rect.height / 2;
+  el.classList.remove('drag-over-top', 'drag-over-bottom');
+  el.classList.add(after ? 'drag-over-bottom' : 'drag-over-top');
+  dragAfter = after;
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+}
+
+function dragLeave(e) {
+  e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
+}
+
+function dropOn(e, type, targetId) {
+  e.preventDefault();
+  if (dragType !== type || !dragId || dragId === targetId) { cleanupDrag(); return; }
   const arr = type === 'goal' ? (DATA.goals || []) : DATA.tasks;
   const fromIdx = arr.findIndex(x => x.id === dragId);
   const toIdx = arr.findIndex(x => x.id === targetId);
-  if (fromIdx < 0 || toIdx < 0) { dragType = null; dragId = null; return; }
+  if (fromIdx < 0 || toIdx < 0) { cleanupDrag(); return; }
   const [item] = arr.splice(fromIdx, 1);
   let insertAt = arr.findIndex(x => x.id === targetId);
-  if (fromIdx < toIdx) insertAt += 1; // 往下拖：插到目标之后
+  if (dragAfter) insertAt += 1;
   arr.splice(insertAt, 0, item);
   saveData(DATA);
   renderAll();
-  dragType = null; dragId = null;
+  cleanupDrag();
+}
+
+function dragEnd() {
+  cleanupDrag();
+}
+
+function cleanupDrag() {
+  if (dragEl) dragEl.classList.remove('dragging');
+  document.querySelectorAll('.drag-over-top, .drag-over-bottom').forEach(el => el.classList.remove('drag-over-top', 'drag-over-bottom'));
+  dragType = null; dragId = null; dragAfter = false; dragEl = null;
+}
+
+function moveTask(id, dir) {
+  const arr = DATA.tasks;
+  const idx = arr.findIndex(x => x.id === id);
+  const newIdx = idx + dir;
+  if (idx < 0 || newIdx < 0 || newIdx >= arr.length) return;
+  const [item] = arr.splice(idx, 1);
+  arr.splice(newIdx, 0, item);
+  saveData(DATA);
+  renderAll();
+}
+
+function moveGoal(id, dir) {
+  const arr = DATA.goals || [];
+  const idx = arr.findIndex(x => x.id === id);
+  const newIdx = idx + dir;
+  if (idx < 0 || newIdx < 0 || newIdx >= arr.length) return;
+  const [item] = arr.splice(idx, 1);
+  arr.splice(newIdx, 0, item);
+  saveData(DATA);
+  renderAll();
 }
 
 function taskItemHtml(t, fullyDone, td) {
@@ -1337,13 +1425,15 @@ function taskItemHtml(t, fullyDone, td) {
     </div>`;
   }
 
-  const dragHandle = fullyDone ? '' : `<span class="drag-handle" draggable="true" ondragstart="dragStart('task','${t.id}')" title="拖动排序">⠿</span>`;
-  const dndAttrs = fullyDone ? '' : ` ondragover="event.preventDefault()" ondrop="dropOn('task','${t.id}')"`;
+  const dragHandle = fullyDone ? '' : `<span class="drag-handle" draggable="true" ondragstart="dragStart(event,'task','${t.id}')" ondragend="dragEnd(event)" title="拖动排序">⠿</span>`;
+  const mobileMove = fullyDone ? '' : `<span class="mobile-move"><button class="move-btn" onclick="moveTask('${t.id}',-1)" title="上移">▲</button><button class="move-btn" onclick="moveTask('${t.id}',1)" title="下移">▼</button></span>`;
+  const dndAttrs = fullyDone ? '' : ` ondragover="dragOver(event,'task','${t.id}')" ondragleave="dragLeave(event)" ondrop="dropOn(event,'task','${t.id}')"`;
 
   return `<li class="task-item ${fullyDone ? 'done' : ''}"${dndAttrs}>
     ${editingTaskId === t.id ? renderEditForm(t) : `
     <div class="task-item-row">
       ${dragHandle}
+      ${mobileMove}
       <div class="task-info">
         <div class="task-name">${escHtml(t.name)}${t.subdividable ? ' <span style="font-size:0.7rem;color:var(--primary);font-weight:600">[细分]</span>' : ''}${t.priority === 'important' ? ' <span class="priority-tag important">⭐ 重要</span>' : ''}${t.priority === 'must' ? ' <span class="priority-tag must">🔒 必做</span>' : ''}</div>
         <div class="task-meta">${deadlineHtml}</div>
@@ -1790,6 +1880,10 @@ sb.auth.onAuthStateChange((event, session) => {
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v3.3.0 <span class="cl-name">移动端适配</span></div>
+            <div class="cl-item">手机触控优化、拖动排序预览、移动端上下移排序</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v3.2.1 <span class="cl-name">细节调整</span></div>
             <div class="cl-item">完成度进度环移到今日任务面板右下角</div>

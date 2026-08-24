@@ -329,6 +329,14 @@
   .auth-msg { color: var(--danger); font-size: 0.8rem; margin: -4px 0 12px; min-height: 1.2em; text-align: center; }
   .auth-btn { width: 100%; padding: 12px; font-size: 0.95rem; justify-content: center; }
   .auth-btn-secondary { width: 100%; padding: 11px; font-size: 0.9rem; justify-content: center; margin-top: 8px; }
+  .auth-tabs { display: flex; gap: 6px; background: var(--bg); padding: 3px; border-radius: 10px; margin-bottom: 14px; }
+  .auth-tab {
+    flex: 1; padding: 9px; border: none; border-radius: 8px; cursor: pointer;
+    font-size: 0.9rem; font-weight: 600; font-family: var(--font);
+    color: var(--text-secondary); background: transparent; transition: all 0.15s;
+  }
+  .auth-tab.active { background: white; color: var(--primary); box-shadow: var(--shadow); }
+  .auth-switch-tip { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 12px; }
 
   /* About tabs */
   .about-tabs { display: flex; gap: 6px; }
@@ -511,6 +519,7 @@ function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)
 // ============================================================
 let currentUser = null;
 let cloudSaveTimer = null;
+let authTab = 'login';
 
 function scheduleCloudSave() {
   if (!currentUser) return;
@@ -565,7 +574,11 @@ function updateAccountUI() {
 async function doSignup() {
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
+  const password2 = document.getElementById('authPassword2').value;
   if (!email || !password) { showAuthMsg('请输入邮箱和密码'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAuthMsg('邮箱格式不正确，请检查'); return; }
+  if (password.length < 6) { showAuthMsg('密码至少 6 位'); return; }
+  if (password !== password2) { showAuthMsg('两次输入的密码不一致'); return; }
   const { data, error } = await sb.auth.signUp({ email, password });
   if (error) { showAuthMsg('注册失败：' + error.message); return; }
   if (data.session) {
@@ -580,6 +593,7 @@ async function doLogin() {
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
   if (!email || !password) { showAuthMsg('请输入邮箱和密码'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAuthMsg('邮箱格式不正确，请检查'); return; }
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if (error) { showAuthMsg('登录失败：' + error.message); return; }
   await handleLogin(data.user);
@@ -609,23 +623,55 @@ function renderAuthModal() {
       <div class="auth-sub">${escHtml(currentUser.email || '')}</div>
       <p class="auth-sub" style="margin-bottom:20px;">数据自动同步到云端，其它设备登录同一账号即可同步。</p>
       <button class="btn btn-primary auth-btn" onclick="doLogout()">退出登录</button>`;
-  } else {
-    body.innerHTML = `
-      <div class="auth-icon">🔐</div>
-      <div class="auth-title">登录 / 注册</div>
-      <p class="auth-sub">本网站支持本地数据储存，注册登录后可跨设备自动同步数据。</p>
-      <div class="auth-field">
-        <label class="auth-label">邮箱</label>
-        <input type="email" id="authEmail" class="auth-input" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="auth-field">
-        <label class="auth-label">密码</label>
-        <input type="password" id="authPassword" class="auth-input" placeholder="至少 6 位" autocomplete="current-password">
-      </div>
-      <div class="auth-msg" id="authMsg"></div>
-      <button class="btn btn-primary auth-btn" onclick="doLogin()">登录</button>
-      <button class="btn btn-ghost auth-btn-secondary" onclick="doSignup()">注册新账号</button>`;
+    return;
   }
+  body.innerHTML = `
+    <div class="auth-icon">🔐</div>
+    <div class="auth-tabs">
+      <button class="auth-tab ${authTab === 'login' ? 'active' : ''}" onclick="switchAuthTab('login')">登录</button>
+      <button class="auth-tab ${authTab === 'signup' ? 'active' : ''}" onclick="switchAuthTab('signup')">注册</button>
+    </div>
+    <p class="auth-sub">本网站支持本地数据储存，注册登录后可跨设备自动同步数据。</p>
+    ${authTab === 'login' ? renderLoginForm() : renderSignupForm()}`;
+}
+
+function renderLoginForm() {
+  return `
+    <div class="auth-field">
+      <label class="auth-label">邮箱</label>
+      <input type="email" id="authEmail" class="auth-input" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label class="auth-label">密码</label>
+      <input type="password" id="authPassword" class="auth-input" placeholder="输入密码" autocomplete="current-password">
+    </div>
+    <div class="auth-msg" id="authMsg"></div>
+    <button class="btn btn-primary auth-btn" onclick="doLogin()">登录</button>
+    <div class="auth-switch-tip">还没有账号？<a class="btn-link" onclick="switchAuthTab('signup')">去注册</a></div>`;
+}
+
+function renderSignupForm() {
+  return `
+    <div class="auth-field">
+      <label class="auth-label">邮箱</label>
+      <input type="email" id="authEmail" class="auth-input" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label class="auth-label">密码</label>
+      <input type="password" id="authPassword" class="auth-input" placeholder="至少 6 位" autocomplete="new-password">
+    </div>
+    <div class="auth-field">
+      <label class="auth-label">确认密码</label>
+      <input type="password" id="authPassword2" class="auth-input" placeholder="再次输入密码" autocomplete="new-password">
+    </div>
+    <div class="auth-msg" id="authMsg"></div>
+    <button class="btn btn-primary auth-btn" onclick="doSignup()">注册</button>
+    <div class="auth-switch-tip">已有账号？<a class="btn-link" onclick="switchAuthTab('login')">去登录</a></div>`;
+}
+
+function switchAuthTab(tab) {
+  authTab = tab;
+  renderAuthModal();
 }
 let DATA = loadData();
 let calYear, calMonth, selectedDay = null;
@@ -1525,7 +1571,15 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && editingGoalId) { e.preventDefault(); cancelGoalEdit(); }
   if (e.key === 'Escape' && document.getElementById('aboutOverlay').classList.contains('show')) { toggleAbout(); }
   if (e.key === 'Escape' && document.getElementById('authOverlay').classList.contains('show')) { closeAuthModal(); }
-  if (e.key === 'Enter' && (document.activeElement === document.getElementById('authEmail') || document.activeElement === document.getElementById('authPassword'))) { e.preventDefault(); doLogin(); }
+  if (e.key === 'Enter') {
+    const ae = document.getElementById('authEmail');
+    const ap = document.getElementById('authPassword');
+    const ap2 = document.getElementById('authPassword2');
+    if (document.activeElement === ae || document.activeElement === ap || (ap2 && document.activeElement === ap2)) {
+      e.preventDefault();
+      if (authTab === 'signup') doSignup(); else doLogin();
+    }
+  }
 });
 
 // ============================================================

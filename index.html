@@ -263,7 +263,7 @@
   .stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
 
   /* 今日完成度进度环 */
-  .ring-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 12px; }
+  .ring-row { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 12px; }
   .ring-wrap { position: relative; width: 66px; height: 66px; }
   .ring-svg { width: 66px; height: 66px; transform: rotate(-90deg); }
   .ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
@@ -488,16 +488,6 @@
       </div>
     </div>
     <div class="panel-body">
-      <div class="ring-row" id="todayRingRow" style="display:none;">
-        <div class="ring-wrap">
-          <svg class="ring-svg" viewBox="0 0 66 66">
-            <circle class="ring-bg" cx="33" cy="33" r="28"/>
-            <circle class="ring-fg" cx="33" cy="33" r="28" id="ringFg"/>
-          </svg>
-          <div class="ring-center"><span class="ring-num" id="ringNum">0%</span></div>
-        </div>
-        <span class="ring-text" id="ringText"></span>
-      </div>
       <div class="settings-row">
         <span>每日任务数：</span>
         <input type="number" id="dailyCount" value="3" min="1" max="10" onchange="saveSettings()">
@@ -510,6 +500,16 @@
         <div class="stat-card"><div class="stat-number" id="statAssigned">0</div><div class="stat-label">今日分配</div></div>
         <div class="stat-card"><div class="stat-number" id="statDone">0</div><div class="stat-label">已完成</div></div>
         <div class="stat-card"><div class="stat-number" id="statRemaining">0</div><div class="stat-label">剩余任务</div></div>
+      </div>
+      <div class="ring-row" id="todayRingRow" style="display:none;">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 66 66">
+            <circle class="ring-bg" cx="33" cy="33" r="28"/>
+            <circle class="ring-fg" cx="33" cy="33" r="28" id="ringFg"/>
+          </svg>
+          <div class="ring-center"><span class="ring-num" id="ringNum">0%</span></div>
+        </div>
+        <span class="ring-text" id="ringText"></span>
       </div>
     </div>
   </section>
@@ -1790,6 +1790,10 @@ sb.auth.onAuthStateChange((event, session) => {
 
       <div class="about-tab-content" id="about-tab-changelog">
         <div class="changelog">
+          <div class="cl-entry">
+            <div class="cl-version">v3.2.1 <span class="cl-name">细节调整</span></div>
+            <div class="cl-item">完成度进度环移到今日任务面板右下角</div>
+          </div>
           <div class="cl-entry">
             <div class="cl-version">v3.2.0 <span class="cl-name">动效升级</span></div>
             <div class="cl-item">随机分配骰子动画、完成度进度环、等宽数字字体</div>
